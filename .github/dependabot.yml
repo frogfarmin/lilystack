@@ -1,0 +1,7 @@
+# Keeps the pinned commits of the GitHub Actions current. Lilystack has no other dependencies.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

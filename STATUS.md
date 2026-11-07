@@ -8,6 +8,7 @@
 - On the main Mac, point `~/.zshrc.local` at `$HOME/Lilystack/mods/status` (Lilypad `Claude/README.md`, section "Status mod").
 
 ## Done
+- 2026-11-07: Security hardening for the public repo: a read-only CI for the four zsh checks, Dependabot for the action pins, CODEOWNERS, secret patterns in .gitignore, and a longer SECURITY.md. A scan of the full git history found no secrets.
 - 2026-11-06: The docs now point to the public Lilypad repo (https://github.com/frogfarmin/Lilypad).
 - 2026-11-06: The repo was cleaned for a public release: no machine names, general install steps, an Original label in the README, and SECURITY.md.
 - 2026-11-06: A code review of the branch. careful, secrets and freeze closed more bypasses; the lint checks each skill with a hook (see `docs/verification-log.md`). All 464 hook tests pass under bash 3.2.57, built from Apple's source (the bash of macOS `/bin/bash`).
