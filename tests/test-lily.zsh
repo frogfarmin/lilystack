@@ -187,6 +187,12 @@ lint_fixture; print x > $LILYPAD_ROOT/shell/stray; print 'See `shell/stray`.' > 
 git -C $LILYPAD_ROOT add -A; out=$($LILY lint)
 assert "lint: named by repo path in another README is not orphan" '[[ $out == clean ]]'
 
+lint_fixture; mkdir $LILYPAD_ROOT/ideas; print '# ideas <!-- lily:hub -->' > $LILYPAD_ROOT/ideas/README.md
+print x > $LILYPAD_ROOT/ideas/new-game.md; git -C $LILYPAD_ROOT add -A; out=$($LILY lint)
+assert "lint: file in a lily:hub folder is not orphan" '[[ $out == clean ]]'
+print '# ideas' > $LILYPAD_ROOT/ideas/README.md; git -C $LILYPAD_ROOT add -A; out=$($LILY lint)
+assert "lint: same folder without the marker is orphan" 'has_line orphan ideas/new-game.md'
+
 lint_fixture; rm $LILYPAD_ROOT/shell/README.md; git -C $LILYPAD_ROOT add -A; out=$($LILY lint)
 assert "lint: mapped area without README"   'has_line no-readme shell/'
 
