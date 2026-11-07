@@ -246,6 +246,7 @@ docs/verification-log.md     the dated live checks and dry runs
 docs/assets/                 the images in this README and the icon source
 STATUS.md                    where the project is
 SECURITY.md                  how to report a security problem
+.github/                     CI for the checks, Dependabot for the action pins, CODEOWNERS
 ```
 
 </details>

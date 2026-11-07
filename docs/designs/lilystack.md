@@ -281,7 +281,13 @@ outside the boundary: redirects, `tee`, `sed -i`, `perl -i`, `cp`, `mv`,
 
 ## 8. Tests
 
-All tests are local. There is no CI, as in Lilypad.
+The tests run local, and in CI since the repo became public (2026-11-07).
+`.github/workflows/checks.yml` runs the four zsh checks on each push to
+`main` and each pull request. It has a read-only token, no secrets and no
+`pull_request_target`, and it pins each action to a commit (Dependabot keeps
+the pins current). The reason: a stranger's pull request that weakens a hook
+must fail before the owner reads it. `claude plugin validate .` stays local,
+because CI would need the Claude Code CLI and an account.
 
 - `claude plugin validate .` passes on the two Macs.
 - `tests/lint-skills.zsh` makes sure that each `skills/*/SKILL.md` has:
