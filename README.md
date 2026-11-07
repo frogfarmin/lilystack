@@ -92,6 +92,9 @@ These are the author's own tools. They are all 🌱 **Original**. The `lily` too
 | [`lily-lint`](skills/lily-lint) | 🌱 **Original.** Gives a hygiene report for Lilypad, with a fix for each finding. |
 | [`lily-sweep`](skills/lily-sweep) | 🌱 **Original.** Moves files to `~/to-delete`. You start it, not Claude. Arguments: `[path ...]`. |
 | [`mods/status`](mods/status) | 🌱 **Original.** A separate mod, loaded through `CLAUDE_CODE_PLUGIN_DIRS`. It keeps `STATUS.md` correct and shows a band above the prompt. |
+| [`mods/verify-gate`](mods/verify-gate) | 🌱 **Original.** A separate mod. It shows **✅ APPROVED** above the prompt only when the checks pass on the committed and pushed tree, and it stops `gh pr merge` until then. Install: `verify-gate@lilystack`. |
+| [`mods/outbound-ledger`](mods/outbound-ledger) | 🌱 **Original.** A separate mod. A pane records each outward action of the session: pushes, `gh`, web calls, MCP writes and artifacts. It only records. Install: `outbound-ledger@lilystack`. |
+| [`mods/focus`](mods/focus) | 🌱 **Original.** A separate mod. A pane shows one main action and the few tasks after it. You check them off. Claude keeps the list current and follows up. Install: `focus@lilystack`. |
 
 ### Also inside
 
@@ -153,7 +156,7 @@ zsh tests/test-lily.zsh        # bin/lily, in a temporary HOME and Lilypad root
 claude plugin validate .       # the manifest and the layout
 ```
 
-After a change to `mods/status`, also run `claude plugin validate .` and `claude plugin test` in `mods/status`. The details are in [`AGENTS.md`](AGENTS.md#checks).
+After a change to a mod in `mods/`, also run `claude plugin validate .` and `claude plugin test` in that mod's folder. The details are in [`AGENTS.md`](AGENTS.md#checks).
 
 ## Where the skills come from
 
@@ -200,6 +203,7 @@ These are the author's own tools (🌱 **Original**). The author keeps config an
 - **`bin/lily`** (zsh) links Lilypad's config into the home folder from Lilypad's `links.conf`. Its root is `$HOME/Lilypad`; `LILYPAD_ROOT` changes it. The commands are `link`, `check`, `adopt`, `lint`, `sweep` and `pull`. `pull` runs `git pull --ff-only` in Lilystack, then in Lilypad, and reports each result. Lilypad's `bin/lily` is a shim that runs this file.
 - **Upgrade order on each Mac:** pull Lilystack first, then Lilypad, then run `~/Lilypad/bin/lily check`. `~/Lilypad/bin/lily pull` does the two pulls in that order, fast-forward only.
 - **`mods/status`** is a Claude Code mod. It keeps the `STATUS.md` of a project correct and shows a band above the prompt. It is not a part of the lilystack plugin. It loads only where `CLAUDE_CODE_PLUGIN_DIRS` names it. See [`mods/status/README.md`](mods/status/README.md).
+- **`mods/verify-gate`, `mods/outbound-ledger` and `mods/focus`** are Claude Code mods too. The marketplace lists each one, so the desktop app can install them: click **+** next to the prompt box, then **Plugins**, then add the plugin. Each README tells what the mod can reach. None of them uses the network.
 
 </details>
 
@@ -239,6 +243,10 @@ output-styles/ste.md         the opt-in Simplified Technical English output styl
 evals/                       trigger, near-miss and quality cases for claude plugin eval
 bin/lily                     the Lilypad link tool (it acts on ~/Lilypad)
 mods/status/                 the status mod: its own manifest, hooks and tests
+mods/verify-gate/            the verify-gate mod: the APPROVED stamp and the merge stop
+mods/outbound-ledger/        the outbound-ledger mod: the pane of outward actions
+mods/focus/                  the focus mod: one main action, then the tasks after it
+.claude/verify-gate.conf     the checks that verify-gate requires in this repo
 tests/                       lint-skills.zsh, test-lint.zsh, test-hooks.zsh, test-lily.zsh
 docs/designs/lilystack.md    the design
 docs/designs/harvest.md      how the harvest found, chose and licensed the skills

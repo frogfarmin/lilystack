@@ -17,7 +17,8 @@ Lilystack is a Claude Code plugin. It has these parts:
 - **Evals** (`evals/`). They make sure that each skill starts when it must,
   and does not start on a near-miss.
 - **The owner's tools.** The `lily` tool (`bin/lily`), the three `lily-*`
-  skills that use it, and the status mod (`mods/status`).
+  skills that use it, and the mods in `mods/`: status, verify-gate,
+  outbound-ledger and focus. The marketplace lists all but status.
 
 Claude Code reads the plugin through `CLAUDE_CODE_PLUGIN_DIRS`, or you install
 it from its marketplace (`.claude-plugin/marketplace.json`). The Lilypad repo
@@ -160,8 +161,8 @@ zsh tests/test-lily.zsh        # bin/lily, in a temporary HOME and Lilypad root
 claude plugin validate .       # the manifest and the layout
 ```
 
-After a change to `mods/status`, also run `claude plugin validate .` and
-`claude plugin test` in `mods/status`.
+After a change to a mod in `mods/`, also run `claude plugin validate .` and
+`claude plugin test` in that mod's folder.
 
 Run all five checks before a commit. A root `CLAUDE.md` causes a warning from
 `claude plugin validate`. For this reason, this file is `AGENTS.md`.

@@ -1,0 +1,4 @@
+{
+  "description": "The verify-gate mod",
+  "modules": ["./register.ts"]
+}

@@ -1,0 +1,7 @@
+{
+  "name": "focus",
+  "version": "0.1.0",
+  "description": "One main action and the few tasks after it, in a Focus pane where you check tasks off",
+  "author": { "name": "SJ" },
+  "types": "./types/index.d.ts"
+}

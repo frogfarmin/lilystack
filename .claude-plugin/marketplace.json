@@ -4,13 +4,28 @@
     "name": "SJ"
   },
   "metadata": {
-    "description": "One plugin: Lilystack, a quiet set of Claude Code skills and bash safety hooks. Markdown and bash; no telemetry"
+    "description": "Lilystack, a quiet set of Claude Code skills and bash safety hooks, and three optional mods. No telemetry"
   },
   "plugins": [
     {
       "name": "lilystack",
       "source": "./",
       "description": "The best Claude Code skills from top GitHub repositories, in short rewrites: think, plan, check and ship, plus bash safety hooks. Markdown and bash; no telemetry"
+    },
+    {
+      "name": "verify-gate",
+      "source": "./mods/verify-gate",
+      "description": "A mod: an APPROVED stamp above the prompt when the checks pass on the committed and pushed tree, and a stop on PR merges until then. Offline"
+    },
+    {
+      "name": "outbound-ledger",
+      "source": "./mods/outbound-ledger",
+      "description": "A mod: a pane that records each outward action of the session (pushes, gh, web, MCP writes, artifacts). Read-only and offline"
+    },
+    {
+      "name": "focus",
+      "source": "./mods/focus",
+      "description": "A mod: one main action and the few tasks after it, in a pane where you check them off. Claude keeps it current and follows up. Offline"
     }
   ]
 }
