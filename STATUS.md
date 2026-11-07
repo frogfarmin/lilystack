@@ -4,7 +4,6 @@
 - Use the new skills on a real project. The seven skills of the first harvest had a dry run on test repos on 2026-11-06. The seven of the second harvest passed their trigger evals, but they had no dry run yet (see `docs/verification-log.md`).
 
 ## Waiting on you
-- Approve the AGENTS.md diff for the three new mods (the owner's tools list and the mod check line).
 - In the desktop app, install `focus`, `verify-gate` and `outbound-ledger` from the lilystack marketplace (+, then Plugins).
 - On each Mac, in this order: pull Lilystack, pull Lilypad, run `~/Lilypad/bin/lily check`.
 - On the main Mac, point `~/.zshrc.local` at `$HOME/Lilystack/mods/status` (Lilypad `Claude/README.md`, section "Status mod").
