@@ -175,7 +175,8 @@ cmd_adopt() {
 # Git-ignored files are not reported: they never reach the repo and some (Finder's .DS_Store,
 # lock files apps write beside a linked config) come back every time the app runs.
 #   untracked  neither committed nor ignored
-#   orphan     tracked, but no links.conf row maps it and no README names it
+#   orphan     tracked, but no links.conf row maps it and no README names it. A top-level
+#              folder whose README.md holds "lily:hub" (a notes folder) is exempt
 #   no-readme  an area folder holding a mapped source has no README.md
 #   dead-ref   a README names a repo path in backticks (a .md file, or a path starting with a
 #              top-level folder) that does not exist
@@ -208,6 +209,7 @@ cmd_lint() {
     if [[ $f == */* ]]; then
       area=${f%%/*}; rel=${f#*/}
       [[ -f $root/$area/README.md && "$(<$root/$area/README.md)" == *"$rel"* ]] && continue
+      [[ -f $root/$area/README.md && "$(<$root/$area/README.md)" == *lily:hub* ]] && continue
     fi
     finding orphan $f
   done

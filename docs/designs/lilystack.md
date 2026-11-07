@@ -37,9 +37,12 @@ no skill or hook sends data out that the owner did not expect.
 
 ## 3. Context
 
-- **Lilypad** is the config repo. It links config into place from
-  `links.conf`. Its lint wants a README in each area, no file larger than
-  100 KB, and no untracked files. On 2026-11-06, the owner's builds
+- **Lilypad** is the owner's hub: a small config core (Claude Code, git,
+  zsh) that `bin/lily` links into place from `links.conf`, and an `ideas/`
+  inbox for ideas, development and fun. Its lint wants a README in each area,
+  no file larger than 100 KB, and no untracked files. A folder whose README
+  holds `lily:hub` is free from the orphan check, so a new note needs no
+  README line (2026-11-07). On 2026-11-06, the owner's builds
   (`bin/lily`, the `lily-*` skills and the status mod) came from Lilypad into
   Lilystack. Lilypad keeps a shim at `bin/lily`.
 - **gstack.** The owner installed gstack one time (Lilypad commit `9f4bd04`),
@@ -92,26 +95,28 @@ Lilystack/
 The repo is on GitHub under the owner's name. The owner clones it to
 `~/Lilystack` on the two Macs.
 
-**How it loads.** There are two ways. Both are supported.
+**How it loads.** There are two ways. Both are supported. Since 2026-11-07
+the owner uses the marketplace, because the owner now works in the Claude
+desktop app, which does not read zsh files.
 
-- **The variable.** Lilypad's `shell/zshrc` sets
-  `CLAUDE_CODE_PLUGIN_DIRS="$HOME/Lilystack"` when the folder exists. For
-  this reason, each Claude Code session in a terminal loads the plugin as
-  `lilystack@inline`. On the main Mac, `~/.zshrc.local` (outside Lilypad) adds the
-  status mod with a colon. The variable needs Claude Code 2.1.280 or later.
-- **The marketplace.** `claude plugin marketplace add ~/Lilystack`, then
+- **The variable.** `CLAUDE_CODE_PLUGIN_DIRS="$HOME/Lilystack"` loads the
+  plugin as `lilystack@inline` in a session that has the variable. A
+  `~/.zshrc.local` (outside Lilypad) can set it, and add the status mod with
+  a colon. The variable needs Claude Code 2.1.280 or later.
+- **The marketplace.** Lilypad's `Claude/settings.json` names the GitHub
+  marketplace in `extraKnownMarketplaces` and enables `lilystack@lilystack`.
+  By hand: `claude plugin marketplace add ~/Lilystack`, then
   `claude plugin install lilystack@lilystack`. From GitHub:
   `/plugin install lilystack --marketplace frogfarmin/Lilystack`.
   `.claude-plugin/marketplace.json` makes this possible. It keeps its state in
   `~/.claude/plugins/`, outside Lilypad. It was tested on 2026-11-06 in a
   cloud container: add, install, enable, uninstall and remove all worked.
 
-**What Lilypad records.** Lilypad has no new area. It records four items:
+**What Lilypad records.** Lilypad has no new area. It records three items:
 
-- the zshrc line and its README note;
+- the marketplace and plugin entries in `Claude/settings.json`;
 - a paragraph in `Claude/README.md`;
-- one restore step in the top README: clone Lilystack;
-- "update Lilystack on the second Mac" in daily use.
+- one restore step in the top README: clone Lilystack (for `bin/lily`).
 
 **State.** Only `~/.lilystack/freeze/<project-key>` for the freeze boundary.
 There is no other state, no analytics and no network.

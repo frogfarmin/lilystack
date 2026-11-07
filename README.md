@@ -83,7 +83,7 @@ careful, secrets and secure read a plain rules file beside the script (`hooks/*-
 
 ### Lily tools (optional)
 
-These are the author's own tools. They are all 🌱 **Original**. The `lily` tool and the `lily-*` skills act on a clone of the author's config repo, [Lilypad](https://github.com/frogfarmin/Lilypad), at `~/Lilypad`, not on the project that you are in. Without a `~/Lilypad` folder they do nothing useful, so you can ignore them. You can also read or fork Lilypad as an example. The status mod works in any project.
+These are the author's own tools. They are all 🌱 **Original**. The `lily` tool and the `lily-*` skills act on a clone of the author's hub repo (config and ideas), [Lilypad](https://github.com/frogfarmin/Lilypad), at `~/Lilypad`, not on the project that you are in. Without a `~/Lilypad` folder they do nothing useful, so you can ignore them. You can also read or fork Lilypad as an example. The status mod works in any project.
 
 | Item&nbsp;or&nbsp;skill | What it does |
 |---|---|
@@ -193,7 +193,7 @@ Each skill is a short rewrite. It keeps the questions, the checklists, the rules
 <details>
 <summary>The author's setup: Lily and the status mod</summary>
 
-These are the author's own tools (🌱 **Original**). The author keeps config in a second, public repo, [Lilypad](https://github.com/frogfarmin/Lilypad), and uses Lilystack on two Macs.
+These are the author's own tools (🌱 **Original**). The author keeps config and ideas in a second repo, [Lilypad](https://github.com/frogfarmin/Lilypad), and uses Lilystack on two Macs, in the Claude desktop app. The desktop app loads Lilystack from its marketplace, which Lilypad's `Claude/settings.json` names.
 
 <p align="center"><img src="docs/assets/repos.svg" width="100%" alt="How Lilystack and Lilypad fit in the author's setup. Lilypad holds the config: links.conf and the config files. bin/lily in Lilystack reads links.conf and makes symlinks on the two Macs. Claude Code on the Macs loads the Lilystack skills and hooks through CLAUDE_CODE_PLUGIN_DIRS. The main Mac also loads the status mod. lily pull updates Lilystack first, then Lilypad, then runs lily check."></p>
 
