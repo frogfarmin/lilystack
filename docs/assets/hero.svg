@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 300" width="960" height="300" role="img" aria-labelledby="t d">
+<title id="t">Lilystack</title>
+<desc id="d">Lilystack: short rewrites of the best Claude Code skills. 32 skills, 5 safety hooks, 46/46 trigger evals pass, 18 upstream sources, no telemetry.</desc>
+<style>
+  svg{--bg:#f6faf7;--bg2:#eef6f8;--card:#ffffff;--line:#d5e3db;--tx:#0f1f17;--mu:#55645c;--th:#3f51b5;--th-f:#eef0ff;--pl:#7c3aed;--pl-f:#f4efff;--ck:#0f766e;--ck-f:#e9f8f5;--sh:#b45309;--sh-f:#fff5e8;--sf:#be123c;--sf-f:#fff0f3;--an:#4d7c0f;--an-f:#f3f9e8;--ly:#047857;--ly-f:#e8f8f0;--pad1:#15803d;--pad2:#22a352;--pad3:#4cc574;--padv:#0e5e2c;--pet:#f9a8c9;--pet2:#fde4ee;--core:#f5c542;--rip:#9cc9b4;}
+  @media (prefers-color-scheme: dark){svg{--bg:#0c1411;--bg2:#0b161b;--card:#131d19;--line:#25352e;--tx:#e7f2ec;--mu:#97a89f;--th:#9fa8ff;--th-f:#15172d;--pl:#c4a6ff;--pl-f:#1b1529;--ck:#5fd4c4;--ck-f:#0d2724;--sh:#f4b860;--sh-f:#231a0e;--sf:#ff8fa8;--sf-f:#261219;--an:#a3d65c;--an-f:#151d0e;--ly:#5ee0a8;--ly-f:#0c2119;--pad1:#1f9d50;--pad2:#2fb862;--pad3:#57d283;--padv:#0b4a23;--pet:#f58ab5;--pet2:#f9c6da;--core:#f5c542;--rip:#2c5244;}}
+  text{font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;fill:var(--tx)}
+  .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+  .mu{fill:var(--mu)}
+  .rip{transform-box:fill-box;transform-origin:center;animation:rip 6s ease-out infinite;opacity:0}
+  .rip2{animation-delay:2s} .rip3{animation-delay:4s}
+  .bob{animation:bob 5s ease-in-out infinite}
+  @keyframes rip{0%{transform:scale(.55);opacity:0}20%{opacity:.85}100%{transform:scale(1.18);opacity:0}}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+  @media (prefers-reduced-motion: reduce){.rip,.bob{animation:none} .rip{opacity:.5}}
+</style>
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--bg)"/><stop offset="1" style="stop-color:var(--bg2)"/></linearGradient></defs>
+<rect width="960" height="300" rx="22" fill="url(#g)"/>
+<ellipse cx="170" cy="238" rx="190" ry="40" fill="none" stroke-opacity=".45" stroke-width="1.4" style="stroke:var(--rip)"/>
+<ellipse class="rip" cx="170" cy="236" rx="210" ry="46" fill="none" stroke-width="1.6" style="stroke:var(--rip)"/>
+<ellipse class="rip rip2" cx="170" cy="236" rx="210" ry="46" fill="none" stroke-width="1.6" style="stroke:var(--rip)"/>
+<ellipse class="rip rip3" cx="170" cy="236" rx="210" ry="46" fill="none" stroke-width="1.6" style="stroke:var(--rip)"/>
+<path d="M170.0,226.0 L245.2,198.5 A128,34 0 1 1 196.6,192.7 Z" style="fill:var(--pad1)"/><path d="M170.0,226.0 L79.1,212.1 M170.0,226.0 L134.1,199.8 M170.0,226.0 L71.4,216.5 M170.0,226.0 L71.4,235.5 M170.0,226.0 L117.5,250.1 M170.0,226.0 L188.2,253.5 M170.0,226.0 L250.4,243.9 M170.0,226.0 L275.0,226.0 M170.0,226.0 L268.6,216.5" stroke-opacity=".35" stroke-width="1.2" fill="none" stroke-linecap="round" style="stroke:var(--padv)"/>
+<g class="bob">
+<path d="M166.0,182.0 L190.2,155.8 A100,27 0 1 1 148.6,155.4 Z" style="fill:var(--pad2)"/><path d="M166.0,182.0 L95.0,170.9 M166.0,182.0 L138.0,161.2 M166.0,182.0 L88.9,174.4 M166.0,182.0 L88.9,189.6 M166.0,182.0 L125.0,201.2 M166.0,182.0 L180.2,203.8 M166.0,182.0 L228.8,196.2 M166.0,182.0 L248.0,182.0 M166.0,182.0 L243.1,174.4" stroke-opacity=".35" stroke-width="1.2" fill="none" stroke-linecap="round" style="stroke:var(--padv)"/>
+<path d="M172.0,142.0 L227.0,128.6 A74,20 0 1 1 204.4,124.0 Z" style="fill:var(--pad3)"/><path d="M172.0,142.0 L119.4,133.8 M172.0,142.0 L151.2,126.6 M172.0,142.0 L115.0,136.4 M172.0,142.0 L115.0,147.6 M172.0,142.0 L141.7,156.2 M172.0,142.0 L182.5,158.2 M172.0,142.0 L218.5,152.5 M172.0,142.0 L232.7,142.0 M172.0,142.0 L229.0,136.4" stroke-opacity=".35" stroke-width="1.2" fill="none" stroke-linecap="round" style="stroke:var(--padv)"/>
+<g transform="translate(170 124) scale(1 .62) translate(-170 -124)"><ellipse cx="170" cy="113" rx="6.5" ry="13" transform="rotate(0 170 124) scale(1)" style="fill:var(--pet)"/><ellipse cx="170" cy="113" rx="6.5" ry="13" transform="rotate(45 170 124) scale(1)" style="fill:var(--pet2)"/><ellipse cx="170" cy="113" rx="6.5" ry="13" transform="rotate(90 170 124) scale(1)" style="fill:var(--pet)"/><ellipse cx="170" cy="113" rx="6.5" ry="13" transform="rotate(135 170 124) scale(1)" style="fill:var(--pet2)"/><ellipse cx="170" cy="113" rx="6.5" ry="13" transform="rotate(180 170 124) scale(1)" style="fill:var(--pet)"/><ellipse cx="170" cy="113" rx="6.5" ry="13" transform="rotate(225 170 124) scale(1)" style="fill:var(--pet2)"/><ellipse cx="170" cy="113" rx="6.5" ry="13" transform="rotate(270 170 124) scale(1)" style="fill:var(--pet)"/><ellipse cx="170" cy="113" rx="6.5" ry="13" transform="rotate(315 170 124) scale(1)" style="fill:var(--pet2)"/><ellipse cx="170" cy="116" rx="4.5" ry="9" transform="rotate(22 170 124)" style="fill:var(--pet)"/><ellipse cx="170" cy="116" rx="4.5" ry="9" transform="rotate(67 170 124)" style="fill:var(--pet)"/><ellipse cx="170" cy="116" rx="4.5" ry="9" transform="rotate(112 170 124)" style="fill:var(--pet)"/><ellipse cx="170" cy="116" rx="4.5" ry="9" transform="rotate(157 170 124)" style="fill:var(--pet)"/><ellipse cx="170" cy="116" rx="4.5" ry="9" transform="rotate(202 170 124)" style="fill:var(--pet)"/><ellipse cx="170" cy="116" rx="4.5" ry="9" transform="rotate(247 170 124)" style="fill:var(--pet)"/><ellipse cx="170" cy="116" rx="4.5" ry="9" transform="rotate(292 170 124)" style="fill:var(--pet)"/><ellipse cx="170" cy="116" rx="4.5" ry="9" transform="rotate(337 170 124)" style="fill:var(--pet)"/><circle cx="170" cy="124" r="5.5" style="fill:var(--core)"/></g>
+</g>
+<text x="352" y="122" font-size="58" font-weight="800" letter-spacing="-1.5">Lilystack</text>
+<text class="mu" x="354" y="160" font-size="20">Short rewrites of the best Claude Code skills.</text>
+<rect x="354" y="190" width="98" height="36" rx="18" stroke-width="1.25" style="fill:var(--card);stroke:var(--line)"/>
+<text x="369" y="214" font-size="16" font-weight="800" style="fill:var(--ly)">32</text>
+<text class="mu" x="396.0" y="213.5" font-size="14">skills</text>
+<rect x="461.6" y="190" width="130" height="36" rx="18" stroke-width="1.25" style="fill:var(--card);stroke:var(--line)"/>
+<text x="476.6" y="214" font-size="16" font-weight="800" style="fill:var(--ly)">5</text>
+<text class="mu" x="493.1" y="213.5" font-size="14">safety hooks</text>
+<rect x="601.3" y="190" width="158" height="36" rx="18" stroke-width="1.25" style="fill:var(--card);stroke:var(--line)"/>
+<text x="616.3" y="214" font-size="16" font-weight="800" style="fill:var(--ly)">46/46</text>
+<text class="mu" x="674.8" y="213.5" font-size="14">evals pass</text>
+<rect x="768.8" y="190" width="108" height="36" rx="18" stroke-width="1.25" style="fill:var(--card);stroke:var(--line)"/>
+<text x="783.8" y="214" font-size="16" font-weight="800" style="fill:var(--ly)">0</text>
+<text class="mu" x="800.3" y="213.5" font-size="14">telemetry</text>
+<text class="mu mono" x="354" y="262" font-size="11.5">Markdown and bash. From 18 upstreams. About 2.1k tokens in each session.</text>
+</svg>

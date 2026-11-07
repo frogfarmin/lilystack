@@ -1,0 +1,343 @@
+#!/usr/bin/env zsh
+# lily — links Lilypad's config files into place. Lives in Lilystack; acts on the Lilypad repo
+# ($LILYPAD_ROOT, default ~/Lilypad). See Lilypad's README.md.
+#
+#   lily link [--dry-run]     create or repair every link named in links.conf
+#   lily check                report each mapping: ok | missing | file | wrong-link | absent
+#   lily adopt [target ...]   move a real file found at a target into Lilypad, then link it
+#   lily lint                 report bloat: untracked | orphan | no-readme | dead-ref | large
+#   lily sweep [--dry-run] <path ...>   move repo paths to $LILYPAD_SWEEP/lilypad-sweep-<date>/
+#   lily pull                 git pull --ff-only in Lilystack, then in Lilypad, reporting each
+#
+# Nothing is ever deleted: whatever is in the way is moved to $LILYPAD_BACKUP/<timestamp>/,
+# and swept files go to $LILYPAD_SWEEP (default ~/to-delete) for the user to empty.
+set -u
+
+LILYPAD_ROOT=${LILYPAD_ROOT:-$HOME/Lilypad}
+LILYSTACK_ROOT=${0:A:h:h}
+LILYPAD_BACKUP=${LILYPAD_BACKUP:-$HOME/.lilypad-backup}
+LILYPAD_SWEEP=${LILYPAD_SWEEP:-$HOME/to-delete}
+MANIFEST=$LILYPAD_ROOT/links.conf
+typeset -a SRCS DSTS
+RUN_STAMP=$(date +%Y%m%d-%H%M%S)-$$
+DRY=0
+
+die()   { print -u2 -- "lily: $*"; exit 2 }
+usage() { print -u2 -- "usage: lily link [--dry-run] | check | adopt [target ...] | lint | sweep [--dry-run] <path ...> | pull"; exit 2 }
+
+# Fill SRCS (absolute sources) and DSTS (absolute targets) from links.conf.
+# A source ending in /* expands to one mapping per child of that directory.
+parse_manifest() {
+  [[ -r $MANIFEST ]] || die "no manifest at $MANIFEST"
+  local line rest n=0 src dst dir child
+  local -a fields
+  while IFS= read -r line || [[ -n $line ]]; do
+    (( n++ ))
+    rest=${line%%\#*}
+    fields=(${=rest})
+    (( ${#fields} == 0 )) && continue
+    (( ${#fields} == 2 )) || die "links.conf:$n: expected 'source target', got ${#fields} fields"
+    src=$fields[1]; dst=$fields[2]
+    [[ $src == /* ]] && die "links.conf:$n: source must be relative to the Lilypad root"
+    dst=${dst/#\~\//$HOME/}
+    dst=${dst%/}
+    [[ $dst == /* ]] || die "links.conf:$n: target must start with ~/ or /"
+    if [[ $src == */\* ]]; then
+      dir=$LILYPAD_ROOT/${src%/\*}
+      if [[ ! -d $dir ]]; then
+        add_mapping $dir "$dst/*" $n      # reported as absent until the directory exists
+      else
+        for child in $dir/*(DN); do
+          [[ ${child:t} == (.DS_Store|.gitkeep) ]] && continue
+          add_mapping $child $dst/${child:t} $n
+        done
+      fi
+    else
+      add_mapping $LILYPAD_ROOT/$src $dst $n
+    fi
+  done < $MANIFEST
+}
+
+# add_mapping <src> <dst> <line>: append one mapping, refusing a target that equals, contains,
+# or sits inside an earlier target. Linking into a linked directory would otherwise move the
+# real source out of Lilypad.
+add_mapping() {
+  local src=$1 dst=$2 n=$3 prev
+  for prev in $DSTS; do
+    [[ $dst == $prev || $dst == $prev/* || $prev == $dst/* ]] &&
+      die "links.conf:$n: target $dst overlaps earlier target $prev"
+  done
+  SRCS+=($src); DSTS+=($dst)
+}
+
+# status_of <src> <dst>: absent | ok | wrong-link | file | missing
+status_of() {
+  local src=$1 dst=$2
+  if [[ ! -e $src ]]; then print absent   # missing, or a dangling symlink
+  elif [[ -L $dst ]]; then
+    [[ ${dst:A} == ${src:A} ]] && print ok || print wrong-link
+  elif [[ -e $dst && ${dst:A} == ${src:A} ]]; then print ok   # reaches the source through a linked parent
+  elif [[ -e $dst ]]; then print file
+  else print missing
+  fi
+}
+
+cmd_check() {
+  local i st bad=0
+  for (( i = 1; i <= ${#SRCS}; i++ )); do
+    st=$(status_of $SRCS[i] $DSTS[i])
+    printf '%-10s %s\n' $st $DSTS[i]
+    [[ $st == (missing|file|wrong-link) ]] && bad=1
+  done
+  return $bad
+}
+
+# Actions. Each prints what it does; with --dry-run it prints "would ..." and does nothing.
+say() { if (( DRY )); then print -- "would $*"; else print -- "$*"; fi }
+backup_path() { print -- $LILYPAD_BACKUP/$RUN_STAMP/${1#/} }
+
+# move_aside <dst>: move whatever sits at dst (a symlink itself, never its referent) into the backup tree.
+move_aside() {
+  local dst=$1 bak
+  bak=$(backup_path $dst)
+  say "backup $dst -> $bak"
+  (( DRY )) && return 0
+  mkdir -p ${bak:h} && mv $dst $bak
+}
+
+# make_link <src> <dst>: create the parent directory and an absolute symlink.
+make_link() {
+  local src=$1 dst=$2
+  say "link $dst -> $src"
+  (( DRY )) && return 0
+  mkdir -p ${dst:h} && ln -s $src $dst
+}
+
+cmd_link() {
+  local i st bad=0
+  for (( i = 1; i <= ${#SRCS}; i++ )); do
+    st=$(status_of $SRCS[i] $DSTS[i])
+    case $st in
+      ok)              ;;
+      missing)         make_link $SRCS[i] $DSTS[i] || bad=1 ;;
+      file|wrong-link) { move_aside $DSTS[i] && make_link $SRCS[i] $DSTS[i] } || bad=1 ;;
+      absent)          print -- "skip $DSTS[i] (no source)" ;;
+    esac
+  done
+  return $bad
+}
+
+# resolve_target <arg>: expand ~ and strip a trailing slash, the same way the manifest is read.
+resolve_target() { local t=${1/#\~\//$HOME/}; print -- ${t%/} }
+
+# adopt_one <src> <dst>: dst is a real file or directory. Move it into Lilypad (or retire it
+# when Lilypad already has identical content), then link it back. Returns 1 on a conflict.
+adopt_one() {
+  local src=$1 dst=$2
+  if [[ ! -e $src && ! -L $src ]]; then
+    say "adopt $dst -> $src"
+    mkdir -p ${src:h} && mv $dst $src && make_link $src $dst
+  elif diff -rq $src $dst >/dev/null 2>&1; then
+    move_aside $dst && make_link $src $dst
+  else
+    diff -ru $src $dst
+    print -u2 -- "conflict $dst: differs from $src, resolve by hand"
+    return 1
+  fi
+}
+
+cmd_adopt() {
+  local i t st bad=0 found
+  local -a wanted
+  if (( $# )); then
+    for t in "$@"; do
+      t=$(resolve_target $t); found=0
+      for (( i = 1; i <= ${#DSTS}; i++ )); do
+        [[ $DSTS[i] == $t ]] && { wanted+=($i); found=1; break }
+      done
+      (( found )) || { print -u2 -- "lily: not in links.conf: $t"; return 1 }
+    done
+  else
+    for (( i = 1; i <= ${#DSTS}; i++ )); do wanted+=($i); done
+  fi
+  for i in $wanted; do
+    if [[ -e $DSTS[i] && ! -L $DSTS[i] ]]; then
+      adopt_one $SRCS[i] $DSTS[i] || bad=1
+    elif (( $# )); then
+      st=$(status_of $SRCS[i] $DSTS[i])
+      print -- "nothing to adopt at $DSTS[i] ($st)"
+    fi
+  done
+  return $bad
+}
+
+# lint: read-only hygiene report over the repo, one "kind  path" line per finding.
+# Git-ignored files are not reported: they never reach the repo and some (Finder's .DS_Store,
+# lock files apps write beside a linked config) come back every time the app runs.
+#   untracked  neither committed nor ignored
+#   orphan     tracked, but no links.conf row maps it and no README names it
+#   no-readme  an area folder holding a mapped source has no README.md
+#   dead-ref   a README names a repo path in backticks (a .md file, or a path starting with a
+#              top-level folder) that does not exist
+#   large      a tracked or untracked file over LINT_MAX_KB
+# Prints "clean" and exits 0 when there is nothing to report; exits 1 otherwise.
+LINT_MAX_KB=100
+LINT_N=0
+finding() { printf '%-10s %s\n' $1 $2; (( LINT_N++ )) }
+
+cmd_lint() {
+  local root=$LILYPAD_ROOT f s rel area readme tok span size docs="" mapped
+  local -a tracked others srcs seen
+  git -C $root rev-parse --git-dir >/dev/null 2>&1 || die "lint needs $root to be a git repository"
+  tracked=(${(0)"$(git -C $root ls-files -z)"})
+  others=(${(0)"$(git -C $root ls-files -z --others --exclude-standard)"})
+  for s in $SRCS; do [[ -e $s || -L $s ]] && srcs+=(${s#$root/}); done
+  for f in $tracked $others; do
+    [[ ${f:t} == README.md && -f $root/$f ]] && docs+=$(<$root/$f)$'\n'
+  done
+
+  for f in $others;  do finding untracked $f; done
+
+  for f in $tracked; do
+    [[ -e $root/$f ]] || continue
+    [[ ${f:t} == (README.md|.gitkeep|.gitignore|links.conf) ]] && continue
+    mapped=0
+    for s in $srcs; do [[ $f == $s || $f == $s/* ]] && { mapped=1; break }; done
+    (( mapped )) && continue
+    [[ $docs == *"$f"* ]] && continue
+    if [[ $f == */* ]]; then
+      area=${f%%/*}; rel=${f#*/}
+      [[ -f $root/$area/README.md && "$(<$root/$area/README.md)" == *"$rel"* ]] && continue
+    fi
+    finding orphan $f
+  done
+
+  for s in $srcs; do
+    [[ $s == */* ]] || continue
+    area=${s%%/*}
+    (( ${seen[(Ie)$area]} )) && continue
+    seen+=($area)
+    [[ -f $root/$area/README.md ]] || finding no-readme $area/
+  done
+
+  for readme in $tracked $others; do
+    [[ ${readme:t} == README.md && -f $root/$readme ]] || continue
+    for span in ${(f)"$(grep -o '`[^`]*`' $root/$readme)"}; do
+      for tok in ${=span//\`/}; do
+        tok=${tok%[,;:)]}
+        [[ $tok == */* ]] || continue
+        [[ $tok == ([~/\$.\<-]*|*://*|*[\*\?]*) ]] && continue
+        [[ $tok == *.md || -d $root/${tok%%/*} ]] || continue
+        [[ -e $root/${readme:h}/$tok || -e $root/$tok ]] || finding dead-ref "$readme: $tok"
+      done
+    done
+  done
+
+  for f in $tracked $others; do
+    [[ -f $root/$f ]] || continue
+    size=$(wc -c < $root/$f)
+    (( size > LINT_MAX_KB * 1024 )) && finding large "$f ($(( size / 1024 )) KB)"
+  done
+
+  (( LINT_N )) && return 1
+  print clean
+}
+
+# is_source <rel>: rel (relative to the root) is exactly a links.conf source.
+is_source() { local s; for s in $SRCS; do [[ ${s#$LILYPAD_ROOT/} == $1 ]] && return 0; done; return 1 }
+
+# sweep: move repo paths (relative to the Lilypad root, or absolute inside it) to
+# $LILYPAD_SWEEP/lilypad-sweep-<YYYYmmdd>/<path> and stage the removal of tracked ones.
+# Every path is checked first; one refusal moves nothing. Refused: paths outside the root,
+# .git, missing paths, a links.conf source or a folder holding one (its link would break),
+# and a destination that already exists. A file inside a mapped folder may go; if that leaves
+# the mapped folder empty it gets a .gitkeep so the folder and its link survive a fresh clone.
+# Any other folder left empty is removed.
+cmd_sweep() {
+  local root=$LILYPAD_ROOT rel s dest dir bad=0 tracked
+  local stamp=lilypad-sweep-$(date +%Y%m%d)
+  local -a rels
+  (( $# )) || usage
+  git -C $root rev-parse --git-dir >/dev/null 2>&1 || die "sweep needs $root to be a git repository"
+  for rel in "$@"; do
+    [[ $rel == $root/* ]] && rel=${rel#$root/}
+    rel=${rel%/}
+    if [[ -z $rel || $rel == (/*|.|..|../*|*/..|*/../*|.git|.git/*) ]]; then
+      print -u2 -- "refuse $rel: not a path inside $root"; bad=1; continue
+    fi
+    if [[ ! -e $root/$rel && ! -L $root/$rel ]]; then
+      print -u2 -- "refuse $rel: does not exist"; bad=1; continue
+    fi
+    for s in $SRCS; do
+      s=${s#$root/}
+      if [[ $rel == $s || $s == $rel/* ]]; then
+        print -u2 -- "refuse $rel: links.conf maps $s; remove that row first"; bad=1; continue 2
+      fi
+    done
+    dest=$LILYPAD_SWEEP/$stamp/$rel
+    if [[ -e $dest || -L $dest ]]; then
+      print -u2 -- "refuse $rel: $dest already exists"; bad=1; continue
+    fi
+    rels+=($rel)
+  done
+  (( bad )) && return 1
+  for rel in $rels; do
+    dest=$LILYPAD_SWEEP/$stamp/$rel
+    say "sweep $rel -> $dest"
+    (( DRY )) && continue
+    tracked=0; [[ -n $(git -C $root ls-files -- $rel) ]] && tracked=1
+    mkdir -p ${dest:h} && mv $root/$rel $dest || return 1
+    (( tracked )) && git -C $root add -A -- $rel
+    dir=${rel:h}
+    [[ $dir != . && -d $root/$dir && -z $(ls -A $root/$dir) ]] || continue
+    if is_source $dir; then
+      touch $root/$dir/.gitkeep && git -C $root add -- $dir/.gitkeep
+      print -- "keep $dir/.gitkeep (mapped folder)"
+    else
+      rmdir $root/$dir
+    fi
+  done
+}
+
+# pull: fast-forward Lilystack, then Lilypad (the upgrade order: the tool before the config it
+# acts on). Never merges and never rewrites history; a repo that cannot fast-forward is reported
+# and left alone, and the other is still tried. Exit 1 if either failed.
+cmd_pull() {
+  local name root out before after bad=0
+  for name root in Lilystack $LILYSTACK_ROOT Lilypad $LILYPAD_ROOT; do
+    if ! git -C $root rev-parse --git-dir >/dev/null 2>&1; then
+      print -u2 -- "fail $name: $root is not a git repository"; bad=1; continue
+    fi
+    before=$(git -C $root rev-parse --short HEAD 2>/dev/null)
+    if out=$(git -C $root pull --ff-only 2>&1); then
+      after=$(git -C $root rev-parse --short HEAD 2>/dev/null)
+      if [[ $before == $after ]]; then print -- "ok   $name: up to date ($after)"
+      else print -- "ok   $name: $before -> $after"; fi
+    else
+      print -u2 -- "fail $name: ${out//$'\n'/ | }"; bad=1
+    fi
+  done
+  return $bad
+}
+
+main() {
+  (( $# )) || usage
+  local cmd=$1; shift
+  case $cmd in
+    check) (( $# == 0 )) || usage; parse_manifest; cmd_check ;;
+    link)  local a; for a in "$@"; do
+             if [[ $a == --dry-run ]]; then DRY=1; else usage; fi
+           done
+           parse_manifest; cmd_link ;;
+    adopt) parse_manifest; cmd_adopt "$@" ;;
+    lint)  (( $# == 0 )) || usage; parse_manifest; cmd_lint ;;
+    pull)  (( $# == 0 )) || usage; cmd_pull ;;
+    sweep) local -a paths; local p
+           for p in "$@"; do
+             if [[ $p == --dry-run ]]; then DRY=1; else paths+=($p); fi
+           done
+           parse_manifest; cmd_sweep $paths ;;
+    *)     usage ;;
+  esac
+}
+main "$@"

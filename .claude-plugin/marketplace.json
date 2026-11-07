@@ -1,0 +1,16 @@
+{
+  "name": "lilystack",
+  "owner": {
+    "name": "SJ"
+  },
+  "metadata": {
+    "description": "One plugin: Lilystack, a quiet set of Claude Code skills and bash safety hooks. Markdown and bash; no telemetry"
+  },
+  "plugins": [
+    {
+      "name": "lilystack",
+      "source": "./",
+      "description": "The best Claude Code skills from top GitHub repositories, in short rewrites: think, plan, check and ship, plus bash safety hooks. Markdown and bash; no telemetry"
+    }
+  ]
+}

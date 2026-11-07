@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 566" width="960" height="566" role="img" aria-labelledby="t d">
+<title id="t">How the Lilystack guards work</title>
+<desc id="d">Claude calls a tool; the guards that you started read it and answer deny, ask, warn or allow. careful reads Bash and answers deny or ask. secrets reads Bash, Read, Grep, Edit and Write and answers deny or ask. secure reads Edit and Write and warns. test-first reads Edit and Write and asks. freeze reads Bash, Edit and Write and answers deny or ask.</desc>
+<style>
+  svg{--bg:#f6faf7;--bg2:#eef6f8;--card:#ffffff;--line:#d5e3db;--tx:#0f1f17;--mu:#55645c;--th:#3f51b5;--th-f:#eef0ff;--pl:#7c3aed;--pl-f:#f4efff;--ck:#0f766e;--ck-f:#e9f8f5;--sh:#b45309;--sh-f:#fff5e8;--sf:#be123c;--sf-f:#fff0f3;--an:#4d7c0f;--an-f:#f3f9e8;--ly:#047857;--ly-f:#e8f8f0;--pad1:#15803d;--pad2:#22a352;--pad3:#4cc574;--padv:#0e5e2c;--pet:#f9a8c9;--pet2:#fde4ee;--core:#f5c542;--rip:#9cc9b4;}
+  @media (prefers-color-scheme: dark){svg{--bg:#0c1411;--bg2:#0b161b;--card:#131d19;--line:#25352e;--tx:#e7f2ec;--mu:#97a89f;--th:#9fa8ff;--th-f:#15172d;--pl:#c4a6ff;--pl-f:#1b1529;--ck:#5fd4c4;--ck-f:#0d2724;--sh:#f4b860;--sh-f:#231a0e;--sf:#ff8fa8;--sf-f:#261219;--an:#a3d65c;--an-f:#151d0e;--ly:#5ee0a8;--ly-f:#0c2119;--pad1:#1f9d50;--pad2:#2fb862;--pad3:#57d283;--padv:#0b4a23;--pet:#f58ab5;--pet2:#f9c6da;--core:#f5c542;--rip:#2c5244;}}
+  text{font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;fill:var(--tx)}
+  .mono{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+  .mu{fill:var(--mu)}
+  .rip{transform-box:fill-box;transform-origin:center;animation:rip 6s ease-out infinite;opacity:0}
+  .rip2{animation-delay:2s} .rip3{animation-delay:4s}
+  .bob{animation:bob 5s ease-in-out infinite}
+  @keyframes rip{0%{transform:scale(.55);opacity:0}20%{opacity:.85}100%{transform:scale(1.18);opacity:0}}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+  @media (prefers-reduced-motion: reduce){.rip,.bob{animation:none} .rip{opacity:.5}}
+</style>
+<rect width="960" height="566" rx="22" style="fill:var(--bg)"/>
+<text x="36" y="44" font-size="20" font-weight="800">How the guards work</text>
+<text class="mu" x="36" y="66" font-size="13">Each guard is a bash script. It reads a tool call before the call runs, and answers.</text>
+<rect x="36" y="92" width="236" height="58" rx="12" style="fill:var(--card);stroke:var(--line)" stroke-width="1.25"/>
+<text x="52" y="117" font-size="14.5" font-weight="700">Claude calls a tool</text>
+<text class="mu" x="52" y="136" font-size="12">Bash, Read, Grep, Edit or Write</text>
+<path d="M282,121 L308,121 M301,114 L308,121 L301,128" fill="none" style="stroke:var(--mu)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="320" y="92" width="282" height="58" rx="12" style="fill:var(--card);stroke:var(--line)" stroke-width="1.25"/>
+<text x="336" y="117" font-size="14.5" font-weight="700">The guards that you started read it</text>
+<text class="mu" x="336" y="136" font-size="12">Only the guards for that tool</text>
+<path d="M612,121 L638,121 M631,114 L638,121 L631,128" fill="none" style="stroke:var(--mu)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="650" y="106" width="62" height="30" rx="15.0" style="fill:var(--sf-f);stroke:var(--sf)" stroke-opacity=".5" stroke-width="1.2"/><text x="681.0" y="126.0" font-size="14" font-weight="700" text-anchor="middle" style="fill:var(--sf)">deny</text>
+<rect x="720" y="106" width="53" height="30" rx="15.0" style="fill:var(--sh-f);stroke:var(--sh)" stroke-opacity=".5" stroke-width="1.2"/><text x="746.5" y="126.0" font-size="14" font-weight="700" text-anchor="middle" style="fill:var(--sh)">ask</text>
+<rect x="781" y="106" width="62" height="30" rx="15.0" style="fill:var(--pl-f);stroke:var(--pl)" stroke-opacity=".5" stroke-width="1.2"/><text x="812.0" y="126.0" font-size="14" font-weight="700" text-anchor="middle" style="fill:var(--pl)">warn</text>
+<rect x="851" y="106" width="71" height="30" rx="15.0" style="fill:var(--ly-f);stroke:var(--ly)" stroke-opacity=".5" stroke-width="1.2"/><text x="886.5" y="126.0" font-size="14" font-weight="700" text-anchor="middle" style="fill:var(--ly)">allow</text>
+<rect x="36" y="186" width="888" height="306" rx="14" style="fill:var(--card);stroke:var(--line)" stroke-width="1.25"/>
+<text class="mu" x="56" y="209" font-size="12" font-weight="700">Guard</text>
+<text class="mu" x="236" y="209" font-size="12" font-weight="700" text-anchor="middle">Bash</text>
+<text class="mu" x="300" y="209" font-size="12" font-weight="700" text-anchor="middle">Read</text>
+<text class="mu" x="364" y="209" font-size="12" font-weight="700" text-anchor="middle">Grep</text>
+<text class="mu" x="446" y="209" font-size="12" font-weight="700" text-anchor="middle">Edit, Write</text>
+<text class="mu" x="520" y="209" font-size="12" font-weight="700">Answers</text>
+<text class="mu" x="652" y="209" font-size="12" font-weight="700">Example</text>
+<rect x="37" y="222" width="886" height="54" style="fill:var(--sf-f)" fill-opacity=".45"/>
+<text class="mono" x="56" y="254" font-size="14" font-weight="700" style="fill:var(--sf)">careful</text>
+<circle cx="236" cy="249" r="8" style="fill:var(--sf)"/>
+<circle cx="300" cy="249" r="6" fill="none" style="stroke:var(--line)" stroke-width="1.5"/>
+<circle cx="364" cy="249" r="6" fill="none" style="stroke:var(--line)" stroke-width="1.5"/>
+<circle cx="446" cy="249" r="6" fill="none" style="stroke:var(--line)" stroke-width="1.5"/>
+<rect x="520" y="238" width="53" height="22" rx="11.0" style="fill:var(--sf-f);stroke:var(--sf)" stroke-opacity=".5" stroke-width="1.2"/><text x="546.4" y="253.3" font-size="12" font-weight="700" text-anchor="middle" style="fill:var(--sf)">deny</text>
+<rect x="578.8" y="238" width="45" height="22" rx="11.0" style="fill:var(--sh-f);stroke:var(--sh)" stroke-opacity=".5" stroke-width="1.2"/><text x="601.1" y="253.3" font-size="12" font-weight="700" text-anchor="middle" style="fill:var(--sh)">ask</text>
+<text class="mono" x="652" y="254" font-size="12.5">rm -rf ~</text>
+<path d="M720.8,250 L738.8,250 M733.8,245 L738.8,250 L733.8,255" fill="none" style="stroke:var(--mu)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="744.8" y="238" width="53" height="22" rx="11.0" style="fill:var(--sf-f);stroke:var(--sf)" stroke-opacity=".5" stroke-width="1.2"/><text x="771.2" y="253.3" font-size="12" font-weight="700" text-anchor="middle" style="fill:var(--sf)">deny</text>
+<text class="mono" x="56" y="308" font-size="14" font-weight="700" style="fill:var(--sf)">secrets</text>
+<circle cx="236" cy="303" r="8" style="fill:var(--sf)"/>
+<circle cx="300" cy="303" r="8" style="fill:var(--sf)"/>
+<circle cx="364" cy="303" r="8" style="fill:var(--sf)"/>
+<circle cx="446" cy="303" r="8" style="fill:var(--sf)"/>
+<rect x="520" y="292" width="53" height="22" rx="11.0" style="fill:var(--sf-f);stroke:var(--sf)" stroke-opacity=".5" stroke-width="1.2"/><text x="546.4" y="307.3" font-size="12" font-weight="700" text-anchor="middle" style="fill:var(--sf)">deny</text>
+<rect x="578.8" y="292" width="45" height="22" rx="11.0" style="fill:var(--sh-f);stroke:var(--sh)" stroke-opacity=".5" stroke-width="1.2"/><text x="601.1" y="307.3" font-size="12" font-weight="700" text-anchor="middle" style="fill:var(--sh)">ask</text>
+<text class="mono" x="652" y="308" font-size="12.5">cat ~/.ssh/id_ed25519</text>
+<path d="M819.6,304 L837.6,304 M832.6,299 L837.6,304 L832.6,309" fill="none" style="stroke:var(--mu)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="843.6" y="292" width="53" height="22" rx="11.0" style="fill:var(--sf-f);stroke:var(--sf)" stroke-opacity=".5" stroke-width="1.2"/><text x="870.0" y="307.3" font-size="12" font-weight="700" text-anchor="middle" style="fill:var(--sf)">deny</text>
+<rect x="37" y="330" width="886" height="54" style="fill:var(--sf-f)" fill-opacity=".45"/>
+<text class="mono" x="56" y="362" font-size="14" font-weight="700" style="fill:var(--sf)">secure</text>
+<circle cx="236" cy="357" r="6" fill="none" style="stroke:var(--line)" stroke-width="1.5"/>
+<circle cx="300" cy="357" r="6" fill="none" style="stroke:var(--line)" stroke-width="1.5"/>
+<circle cx="364" cy="357" r="6" fill="none" style="stroke:var(--line)" stroke-width="1.5"/>
+<circle cx="446" cy="357" r="8" style="fill:var(--sf)"/>
+<rect x="520" y="346" width="53" height="22" rx="11.0" style="fill:var(--pl-f);stroke:var(--pl)" stroke-opacity=".5" stroke-width="1.2"/><text x="546.4" y="361.3" font-size="12" font-weight="700" text-anchor="middle" style="fill:var(--pl)">warn</text>
+<text class="mono" x="652" y="362" font-size="12.5">eval(user_input)</text>
+<path d="M781.6,358 L799.6,358 M794.6,353 L799.6,358 L794.6,363" fill="none" style="stroke:var(--mu)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="805.6" y="346" width="53" height="22" rx="11.0" style="fill:var(--pl-f);stroke:var(--pl)" stroke-opacity=".5" stroke-width="1.2"/><text x="832.0" y="361.3" font-size="12" font-weight="700" text-anchor="middle" style="fill:var(--pl)">warn</text>
+<text class="mono" x="56" y="416" font-size="14" font-weight="700" style="fill:var(--sf)">test-first</text>
+<circle cx="236" cy="411" r="6" fill="none" style="stroke:var(--line)" stroke-width="1.5"/>
+<circle cx="300" cy="411" r="6" fill="none" style="stroke:var(--line)" stroke-width="1.5"/>
+<circle cx="364" cy="411" r="6" fill="none" style="stroke:var(--line)" stroke-width="1.5"/>
+<circle cx="446" cy="411" r="8" style="fill:var(--sf)"/>
+<rect x="520" y="400" width="45" height="22" rx="11.0" style="fill:var(--sh-f);stroke:var(--sh)" stroke-opacity=".5" stroke-width="1.2"/><text x="542.3" y="415.3" font-size="12" font-weight="700" text-anchor="middle" style="fill:var(--sh)">ask</text>
+<text class="mono" x="652" y="416" font-size="12.5">edit app.ts, no test yet</text>
+<path d="M842.4,412 L860.4,412 M855.4,407 L860.4,412 L855.4,417" fill="none" style="stroke:var(--mu)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="866.4" y="400" width="45" height="22" rx="11.0" style="fill:var(--sh-f);stroke:var(--sh)" stroke-opacity=".5" stroke-width="1.2"/><text x="888.7" y="415.3" font-size="12" font-weight="700" text-anchor="middle" style="fill:var(--sh)">ask</text>
+<rect x="37" y="438" width="886" height="54" style="fill:var(--sf-f)" fill-opacity=".45"/>
+<text class="mono" x="56" y="470" font-size="14" font-weight="700" style="fill:var(--sf)">freeze</text>
+<circle cx="236" cy="465" r="8" style="fill:var(--sf)"/>
+<circle cx="300" cy="465" r="6" fill="none" style="stroke:var(--line)" stroke-width="1.5"/>
+<circle cx="364" cy="465" r="6" fill="none" style="stroke:var(--line)" stroke-width="1.5"/>
+<circle cx="446" cy="465" r="8" style="fill:var(--sf)"/>
+<rect x="520" y="454" width="53" height="22" rx="11.0" style="fill:var(--sf-f);stroke:var(--sf)" stroke-opacity=".5" stroke-width="1.2"/><text x="546.4" y="469.3" font-size="12" font-weight="700" text-anchor="middle" style="fill:var(--sf)">deny</text>
+<rect x="578.8" y="454" width="45" height="22" rx="11.0" style="fill:var(--sh-f);stroke:var(--sh)" stroke-opacity=".5" stroke-width="1.2"/><text x="601.1" y="469.3" font-size="12" font-weight="700" text-anchor="middle" style="fill:var(--sh)">ask</text>
+<text class="mono" x="652" y="470" font-size="12.5">edit outside src/</text>
+<path d="M789.2,466 L807.2,466 M802.2,461 L807.2,466 L802.2,471" fill="none" style="stroke:var(--mu)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+<rect x="813.2" y="454" width="53" height="22" rx="11.0" style="fill:var(--sf-f);stroke:var(--sf)" stroke-opacity=".5" stroke-width="1.2"/><text x="839.6" y="469.3" font-size="12" font-weight="700" text-anchor="middle" style="fill:var(--sf)">deny</text>
+<text x="36" y="522" font-size="13.5"><tspan class="mono" font-weight="700" style="fill:var(--sf)">guard &lt;dir&gt;</tspan> starts careful, secrets, secure and freeze with one call.</text>
+<text class="mu" x="36" y="544" font-size="12.5">A guard matches text, so it is a guardrail, not a security boundary. Claude Code permission rules are the stronger layer.</text>
+</svg>

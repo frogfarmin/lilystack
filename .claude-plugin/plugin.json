@@ -1,0 +1,8 @@
+{
+  "name": "lilystack",
+  "version": "0.2.0",
+  "description": "The best Claude Code skills from top GitHub repositories, rewritten small and quiet: think, plan, check and ship, plus bash safety hooks. Markdown and bash; no telemetry",
+  "author": { "name": "SJ" },
+  "license": "MIT",
+  "repository": "https://github.com/frogfarmin/Lilystack"
+}
