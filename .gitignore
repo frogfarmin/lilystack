@@ -17,3 +17,6 @@ id_ed25519*
 *.tfvars
 .claude/settings.local.json
 CLAUDE.local.md
+
+# The mod types that Claude Code writes when a mod loads. Not in git.
+mods/*/.claude-plugin/types/

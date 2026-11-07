@@ -1,0 +1,4 @@
+{
+  "description": "The outbound-ledger mod",
+  "modules": ["./register.tsx"]
+}

@@ -7,7 +7,8 @@ for each skill and keeps the notices that their licenses need.
 
 These parts are the owner's own work. They do not come from an upstream:
 
-- `bin/lily`, the `lily-*` skills and `mods/status`;
+- `bin/lily`, the `lily-*` skills, and the mods `mods/status`,
+  `mods/verify-gate`, `mods/outbound-ledger` and `mods/focus`;
 - the `secrets` hook, `hooks/lib-path.sh`, and the Bash-write parser in
   `hooks/freeze.sh`;
 - the `lens` agent, the `ste` output style and the eval suite in `evals/`.

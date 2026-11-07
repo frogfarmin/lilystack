@@ -1,0 +1,6 @@
+{
+  "name": "verify-gate",
+  "version": "0.1.0",
+  "description": "Shows an APPROVED stamp above the prompt when the checks pass on the committed and pushed tree, and stops PR merges until then",
+  "author": { "name": "SJ" }
+}

@@ -86,6 +86,10 @@ Lilystack/
   evals/                           the trigger and near-miss cases for claude plugin eval
   bin/lily                         the Lilypad link tool
   mods/status/                     the status mod: its own manifest, hooks and tests
+  mods/verify-gate/                the APPROVED stamp and the merge stop
+  mods/outbound-ledger/            the pane of outward actions
+  mods/focus/                      one main action, then the tasks after it
+  .claude/verify-gate.conf         the checks that verify-gate requires here
   tests/                           the lint, its tests, the hook tests, the lily tests
   docs/designs/                    this file and harvest.md
   docs/verification-log.md         the dated live checks and dry runs
@@ -207,6 +211,8 @@ Lilystack uses these features of Claude Code (2.1.318).
 | A marketplace | `.claude-plugin/marketplace.json` | A second way to install, from the folder or from GitHub |
 | `claude plugin details` | the README | The cost of the plugin in tokens: about 1,500 tokens in each session before a skill starts (`claude plugin details lilystack`) |
 | A plugin icon | `.claude-plugin/icon.png` | `claude plugin validate .` passes with no warning |
+| Mods (TypeScript hooks modules) | `mods/` | A band, a pane, a model tool or a merge stop needs the mods API. Bash cannot draw in the app. Each mod is self-contained, has its own tests (`claude plugin test`), and makes no network call (rule 1) |
+| Marketplace entries for mods | `.claude-plugin/marketplace.json` | The desktop app does not read zsh files, so `CLAUDE_CODE_PLUGIN_DIRS` does not reach it. A marketplace entry with a relative path is read from the clone itself |
 
 Lilystack does not use these features now, by choice and not by rule:
 
