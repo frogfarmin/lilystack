@@ -1,7 +1,7 @@
 // The verify-gate mod: an APPROVED stamp above the prompt when the checks pass on the
 // committed and pushed tree, and a stop on PR merges until then.
 // Every mods API call lives in this file; gate.ts is pure.
-import { bandRows, checksIn, denyText, emptyState, isMergeCommand, parseConf, parseGitStatus, report, verdict } from './gate.ts'
+import { bandRows, checksIn, denyText, emptyState, isMergeCommand, noRepoText, parseConf, parseGitStatus, report, verdict } from './gate.ts'
 import type { GateState, GitFacts } from './gate.ts'
 import type { EngineInterface, Register } from 'claude-code'
 
@@ -14,6 +14,7 @@ const EDIT_TOOLS = new Set(['Edit', 'Write', 'NotebookEdit', 'MultiEdit'])
 let state: GateState = emptyState()
 let root: string | null = null
 let cwd = ''
+let base: string | null = null // the session folder that root and state belong to
 let editsThisTurn = 0
 let checksThisTurn = 0
 let error: string | null = null
@@ -77,17 +78,42 @@ async function loadConf($: $): Promise<void> {
   }
 }
 
+// The session can move after session.start: the desktop app can start a session in a
+// spare folder and then move it to the project. So the hooks read the folder again.
+// A move starts over, because a check in one project says nothing about another.
+async function settle($: $, at: string): Promise<void> {
+  if (at === base) return
+  base = at
+  cwd = at
+  state = emptyState()
+  error = null
+  root = await findRoot($, at)
+  await loadConf($)
+  await refreshGit($)
+}
+
+async function follow($: $): Promise<void> {
+  try {
+    await settle($, await $.session.root())
+  } catch (err) {
+    error = message(err)
+  }
+}
+
 // The .catch of a merge hook: a fault in the gate stops the merge.
 function stopped() {
   return { deny: 'verify-gate: the gate failed, so the merge is stopped.' }
 }
 
 async function gateMerge($: $, e: { tool: string }, next: (e: any) => Promise<any>) {
+  await follow($)
   try {
     await refreshGit($)
   } catch {
     // the verdict below then uses the last facts
   }
+  // With no git facts the verdict could not see an uncommitted or unpushed change.
+  if (state.git === null) return { deny: noRepoText(cwd) }
   if (verdict(state).status !== 'approved') return { deny: denyText(state) }
   $.ui.toast('verify-gate: ✅ approved, the merge goes ahead')
   return next(e)
@@ -96,11 +122,8 @@ async function gateMerge($: $, e: { tool: string }, next: (e: any) => Promise<an
 export const register: Register = (on) => {
   on('session.start', async ($, e, next) => {
     try {
-      state = emptyState()
-      cwd = typeof e.cwd === 'string' ? e.cwd : ''
-      root = await findRoot($, cwd)
-      await loadConf($)
-      await refreshGit($)
+      base = null
+      await settle($, typeof e.cwd === 'string' ? e.cwd : '')
     } catch (err) {
       error = message(err)
     }
@@ -116,6 +139,7 @@ export const register: Register = (on) => {
   on('tool.call', { tool: 'Bash' }, async ($, e, next) => {
     const command = typeof e.command === 'string' ? e.command : ''
     if (isMergeCommand(command)) return gateMerge($, e, next)
+    await follow($)
     const { counted } = checksIn(command, state.required)
     if (counted.length === 0 || e.run_in_background === true) return next(e)
     const r = await next(e)
@@ -144,6 +168,7 @@ export const register: Register = (on) => {
 
   on('tool.call', async ($, e, next) => {
     if (!EDIT_TOOLS.has(e.tool)) return next(e)
+    await follow($)
     const r = await next(e)
     try {
       if (r.deny === undefined && r.isError !== true) {
@@ -162,12 +187,18 @@ export const register: Register = (on) => {
   }).catch(($, e, next) => next(e))
 
   on('turn.start', async ($, e, next) => {
-    if (e.agentId === undefined) { editsThisTurn = 0; checksThisTurn = 0 }
+    if (e.agentId === undefined) {
+      editsThisTurn = 0
+      checksThisTurn = 0
+      await follow($)
+      $.ui.invalidate('ui.render')
+    }
     return next(e)
   })
 
   on('turn.complete', async ($, e, next) => {
     if (e.agentId !== undefined) return next(e)
+    await follow($)
     await refreshGit($)
     if (editsThisTurn > 0 && state.edited.length > 0) {
       $.ui.toast(`verify-gate: ${state.edited.length} file${state.edited.length === 1 ? '' : 's'} edited and no check ran after ${state.edited.length === 1 ? 'it' : 'them'}`)
@@ -193,6 +224,7 @@ export const register: Register = (on) => {
   })
 
   on('command.run', { command: 'gate' }, async ($) => {
+    await follow($)
     await refreshGit($)
     $.ui.invalidate('ui.render')
     return { text: report(state) }

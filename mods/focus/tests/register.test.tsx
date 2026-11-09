@@ -30,12 +30,13 @@ const stored = {
 }
 
 // Stubs the world beneath the mod and starts the session. Answers the toasts and the store writes it records.
-async function start($: Engine, on: On, entries: Record<string, unknown> = {}) {
+async function start($: Engine, on: On, entries: Record<string, unknown> = {}, at = { root: ROOT + '/src' }) {
   const clock = mock.clock(on, { now: T })
   const store: Record<string, unknown> = { ...entries }
   const toasts: string[] = []
   const writes: unknown[] = []
   on('session.start', (_, e) => ({ cwd: e.cwd }))
+  on('session.root', () => ({ value: at.root }))
   on('fs.exists', (_, e) => ({ value: e.path === ROOT + '/.git' }))
   on('command.register', (_, e) => ({ value: { command: e.name } }))
   on('tool.register', (_, e) => ({ value: { tool: 'mcp__focus__' + e.name } }))
@@ -51,8 +52,8 @@ async function start($: Engine, on: On, entries: Record<string, unknown> = {}) {
     store[e.key] = JSON.parse(JSON.stringify(e.value))
     return { value: undefined }
   })
-  await $.session.start({ cwd: ROOT + '/src', surface: 'desktop', isInteractive: true })
-  return { clock, toasts, writes }
+  await $.session.start({ cwd: at.root, surface: 'desktop', isInteractive: true })
+  return { clock, toasts, writes, store }
 }
 
 test('an open main action from before raises a toast at the start', async ($, on) => {
@@ -162,4 +163,26 @@ test('the nudge comes once, after 45 minutes open', async ($, on) => {
   expect(toasts.filter((t) => t.startsWith('Still on:'))).toEqual(['Still on: Pick the shortlist? Press ✓ Done when it is done.'])
   await clock.advance(30 * 60_000)
   expect(toasts.filter((t) => t.startsWith('Still on:')).length).toBe(1)
+})
+
+// The desktop app can start a session in a spare folder, then move it to the project.
+const SPARE = '/Users/me/.claude/spares/spare-x'
+
+test('a session moved out of a spare folder saves under the project', async ($, on) => {
+  const at = { root: SPARE }
+  const { store } = await start($, on, {}, at)
+  at.root = ROOT
+  await $.tool.call({ tool: 'mcp__focus__set', main: 'Ship the fix' })
+  expect((store[KEY] as { main: { text: string } }).main.text).toBe('Ship the fix')
+  expect(store['list:' + SPARE]).toBeUndefined()
+})
+
+test('a session moved out of a spare folder loads the open list of the project', async ($, on) => {
+  const at = { root: SPARE }
+  const { toasts } = await start($, on, { [KEY]: stored }, at)
+  expect(toasts).toEqual([])
+  at.root = ROOT
+  const check = await $.tool.call({ tool: 'mcp__focus__check', item: 'main' })
+  expect(String(check.result)).toContain('Checked off: Pick the shortlist.')
+  expect(toasts).toContain('Still open from last time: Pick the shortlist')
 })

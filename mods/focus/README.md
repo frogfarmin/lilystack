@@ -53,7 +53,10 @@ The status line shows `🎯 <main action> · N after`.
 ## What it can reach
 
 - It reads the folders above the session folder, to find the `.git` folder.
-- It keeps the list in the store of the mod, under `list:<project root>`.
+- It keeps the list in the store of the mod, under `list:<project root>`. The
+  mod asks the engine for the project folder as it works, so a session that
+  moves (the desktop app can start one in a spare folder, and `/cd` moves one
+  too) gets the list of the project it moved to.
 - It makes no network calls and starts no processes.
 
 ## How to install

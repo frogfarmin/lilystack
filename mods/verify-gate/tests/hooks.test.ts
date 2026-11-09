@@ -12,9 +12,10 @@ const BAND = {
 } as const
 
 // A fake repo: `git status` reads `git.status`, the fingerprint reads `git.tree`.
-const setup = async ($, on, git: { status: string; tree: string }, tool: (e) => unknown) => {
+const setup = async ($, on, git: { status: string; tree: string }, tool: (e) => unknown, at = { root: ROOT }) => {
   mock.clock(on)
-  on('session.start', () => ({ cwd: ROOT }))
+  on('session.start', () => ({ cwd: at.root }))
+  on('session.root', () => ({ value: at.root }))
   on('command.register', () => ({ value: undefined }))
   on('fs.exists', ($, e) => ({ value: [ROOT + '/.git', ROOT + '/.claude/verify-gate.conf', ROOT + '/.git/index'].includes(e.path) }))
   on('fs.read', () => ({ value: CONF }))
@@ -30,7 +31,7 @@ const setup = async ($, on, git: { status: string; tree: string }, tool: (e) => 
   on('ui.render', () => ({ type: 'Text', props: {}, children: [] }))
   on('ui.toast', () => ({ value: undefined }))
   on('tool.call', ($, e) => tool(e))
-  await $.session.start({ surface: 'desktop', isInteractive: true, cwd: ROOT })
+  await $.session.start({ surface: 'desktop', isInteractive: true, cwd: at.root })
 }
 
 const stampText = async ($) => {
@@ -75,4 +76,40 @@ test('an edit after the checks makes the stamp stale', async ($, on) => {
   await $.tool.call({ tool: 'Edit', file_path: ROOT + '/src/x.ts', old_string: 'a', new_string: 'b' })
   await $.tool.call({ tool: 'Bash', command: 'git status' })
   expect(await stampText($)).toBe('⛔ NOT APPROVED · 2 of 2 checks to run · 1 file edited since the checks')
+})
+
+// The desktop app can start a session in a spare folder, then move it to the project.
+const SPARE = '/Users/me/.claude/spares/spare-x'
+
+test('a session moved out of a spare folder reads the conf and the git state of the project', async ($, on) => {
+  const git = { status: '## f...origin/f\n?? stray.txt\n', tree: 't1' }
+  const at = { root: SPARE }
+  const ran: string[] = []
+  await setup($, on, git, (e) => { ran.push(e.command ?? e.tool); return { result: { stdout: 'ok' } } }, at)
+  at.root = ROOT
+  await $.tool.call({ tool: 'Bash', command: 'zsh tests/a.zsh' })
+  expect(await stampText($)).toContain('1 of 2 checks to run')
+  await $.tool.call({ tool: 'Bash', command: 'zsh tests/b.zsh' })
+  const merged = await $.tool.call({ tool: 'Bash', command: 'gh pr merge 7 --squash' })
+  expect(String(merged.deny ?? merged.text)).toContain('1 file not committed')
+  expect(ran).not.toContain('gh pr merge 7 --squash')
+})
+
+test('a check from before the move does not count in the new project', async ($, on) => {
+  const git = { status: '## f...origin/f\n', tree: 't1' }
+  const at = { root: SPARE }
+  await setup($, on, git, () => ({ result: { stdout: 'ok' } }), at)
+  await $.tool.call({ tool: 'Bash', command: 'zsh tests/a.zsh' })
+  at.root = ROOT
+  await $.tool.call({ tool: 'Bash', command: 'zsh tests/b.zsh' })
+  expect(await stampText($)).toContain('1 of 2 checks to run')
+})
+
+test('with no git repo a merge is stopped, even after a check passes', async ($, on) => {
+  const ran: string[] = []
+  await setup($, on, { status: '', tree: '' }, (e) => { ran.push(e.command ?? e.tool); return { result: { stdout: 'ok' } } }, { root: SPARE })
+  await $.tool.call({ tool: 'Bash', command: 'zsh tests/a.zsh' })
+  const merged = await $.tool.call({ tool: 'Bash', command: 'gh pr merge 7 --squash' })
+  expect(String(merged.deny ?? merged.text)).toContain('cannot read a git repo')
+  expect(ran).not.toContain('gh pr merge 7 --squash')
 })

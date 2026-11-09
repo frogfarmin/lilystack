@@ -182,3 +182,7 @@ export function denyText(s: GateState): string {
   const v = verdict(s)
   return `verify-gate: merge stopped, the gate is not approved (${v.reasons.join(', ') || 'no checks ran'}).` + (v.next ? ` Next: ${v.next}.` : '') + ' Type /gate for the details.'
 }
+
+// The deny text when the gate has no git facts: it cannot tell what is committed or pushed.
+export const noRepoText = (folder: string): string =>
+  `verify-gate: merge stopped, the gate cannot read a git repo at ${folder || 'the session folder'}. Move the session into the repo with /cd, then run the checks there.`
