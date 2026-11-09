@@ -10,8 +10,10 @@
    - all commits are pushed.
 2. Until the stamp says APPROVED, it stops a PR merge: `gh pr merge`,
    `mcp__github__merge_pull_request` and `mcp__github__enable_pr_auto_merge`.
-   The deny message tells Claude what to do next. A local `git merge` is not
-   stopped, because `ship` uses it to merge the base into the branch.
+   The deny message tells Claude what to do next. It also stops a merge when
+   it cannot read a git repo, because then it cannot see what is committed. A
+   local `git merge` is not stopped, because `ship` uses it to merge the base
+   into the branch.
 3. At the end of a turn with edits and no check after them, it shows a toast.
 
 This mod is not a part of the lilystack plugin. You install it by itself
@@ -54,6 +56,14 @@ check that passed before the commit is still good after the commit.
 
 `git add -A` on the copy writes blob objects into `.git/objects`. `git gc`
 removes them when nothing uses them.
+
+## When the session moves
+
+The desktop app can start a session in a spare folder and then move it to the
+project. `/cd` moves a session too. So the mod asks the engine for the project
+folder (`$.session.root()`) as it works, and does not keep the folder from the
+start of the session. After a move it starts over: it reads the conf of the new
+project, and a check from the old folder does not count.
 
 ## What it can reach
 

@@ -18,6 +18,7 @@ const listAtom = atom({ plugin: 'focus', key: 'list' } as const, empty(), { shap
 
 // Module state. It resets on a reload and is rebuilt at session.start.
 let storeKey = 'list:'
+let base: string | null = null // the session folder that storeKey belongs to
 
 const message = (err: unknown): string => (err instanceof Error ? err.message : String(err))
 const dirname = (path: string): string => path.replace(/\/[^/]*$/, '') || '/'
@@ -33,8 +34,32 @@ async function findRoot($: EngineInterface, cwd: string): Promise<string> {
   }
 }
 
+// Load the list of the project that holds this folder, unless it is the one already loaded.
+async function settle($: EngineInterface, at: string): Promise<void> {
+  if (at === base) return
+  base = at
+  const key = 'list:' + (await findRoot($, at))
+  if (key === storeKey) return
+  storeKey = key
+  const list = fromStore(await $.store.get(storeKey))
+  await update($, listAtom, () => list)
+  $.ui.status(statusText(list))
+  if (list.main) $.ui.toast(`Still open from last time: ${list.main.text}`)
+}
+
+// The session can move after session.start: the desktop app can start a session in a
+// spare folder and then move it to the project. So the hooks read the folder again.
+async function follow($: EngineInterface): Promise<void> {
+  try {
+    await settle($, await $.session.root())
+  } catch {
+    // the list of the last known project stays
+  }
+}
+
 // Apply one op to the list: the state, the store and the status line.
 async function change($: EngineInterface, op: (list: FocusList, now: number) => FocusList): Promise<{ before: FocusList; after: FocusList }> {
+  await follow($)
   const now = await $.clock.now()
   const before = await read($, listAtom)
   const after = op(before, now)
@@ -81,12 +106,9 @@ export const register: Register = (on) => {
   on('session.start', async ($, e, next) => {
     const started = await next(e)
     try {
-      const root = await findRoot($, typeof e.cwd === 'string' ? e.cwd : '/')
-      storeKey = 'list:' + root
-      const list = fromStore(await $.store.get(storeKey))
-      await update($, listAtom, () => list)
-      $.ui.status(statusText(list))
-      if (list.main) $.ui.toast(`Still open from last time: ${list.main.text}`)
+      base = null
+      storeKey = 'list:'
+      await settle($, typeof e.cwd === 'string' ? e.cwd : '/')
     } catch (err) {
       $.ui.toast('focus: list not loaded (' + message(err) + ')')
     }
@@ -166,10 +188,16 @@ export const register: Register = (on) => {
     return { result: `Checked off: ${(checked as Item).text}.` + (after.main ? ` Main now: ${after.main.text}.` : ' The list is done.') }
   }).catch(($, e, next) => (next.called ? next(e) : { deny: 'focus: the list tool failed.' }))
 
+  on('turn.start', async ($, e, next) => {
+    if (e.agentId === undefined) await follow($)
+    return next(e)
+  })
+
   on('prompt.compose', async ($, e, next) => {
     const composed = await next(e)
     if (!e.tools.includes(SET_TOOL)) return composed
     try {
+      await follow($)
       const list = await read($, listAtom)
       const text = promptText(list, await $.clock.now())
       return { ...composed, sections: [...composed.sections, { id: 'focus:list', text, scope: 'session' as const }] }
@@ -196,6 +224,7 @@ export const register: Register = (on) => {
   }).catch(() => ({ text: 'focus: the command failed.' }))
 
   on('command.run', { command: 'done' }, async ($) => {
+    await follow($)
     const before = await read($, listAtom)
     if (!before.main) return { text: 'No main action is open.' }
     await doCheckMain($)
