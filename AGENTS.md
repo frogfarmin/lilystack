@@ -11,7 +11,7 @@ Lilystack is a Claude Code plugin. It has these parts:
 - **Hooks.** Bash scripts in `hooks/`. careful, secrets and secure read a
   plain rules file beside the script.
 - **A lens agent** (`agents/lens.md`). It is a read-only subagent for review
-  (also when ship runs review). Its tools are Read, Grep and Glob only.
+  (also when ship runs review), security-audit and the plan skills. Its tools are Read, Grep and Glob only.
 - **An output style** (`output-styles/ste.md`). It is opt-in. It makes Claude
   write in Simplified Technical English.
 - **Evals** (`evals/`). They make sure that each skill starts when it must,
@@ -147,7 +147,7 @@ claude plugin eval . --tag trigger --ablation none --no-publish
 ```
 
 Give `--no-publish` unless you want the report on claude.ai. Trigger cases
-use the graders that need no model (`tool_used`, `regex`). Quality cases may
+use the grader that needs no model (`tool_used`). Quality cases may
 use `llm` graders. When you add a skill that Claude can start, add its two
 trigger cases. `evals/README.md` has the details.
 

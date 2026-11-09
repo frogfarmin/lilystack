@@ -81,9 +81,9 @@ Lilystack/
   STATUS.md                        where the project is, in the grammar of the status mod
   skills/<name>/SKILL.md           one folder for each skill; sections/*.md are read on demand
   hooks/                           the hook scripts, their rules files and lib-path.sh
-  agents/lens.md                   the read-only lens subagent for review
+  agents/lens.md                   the read-only lens subagent for review, security-audit and the plan skills
   output-styles/ste.md             the opt-in Simplified Technical English output style
-  evals/                           the trigger and near-miss cases for claude plugin eval
+  evals/                           the trigger, near-miss and quality cases for claude plugin eval
   bin/lily                         the Lilypad link tool
   mods/status/                     the status mod: its own manifest, hooks and tests
   mods/verify-gate/                the APPROVED stamp and the merge stop
@@ -111,7 +111,8 @@ desktop app, which does not read zsh files.
   marketplace in `extraKnownMarketplaces` and enables `lilystack@lilystack`.
   By hand: `claude plugin marketplace add ~/Lilystack`, then
   `claude plugin install lilystack@lilystack`. From GitHub:
-  `/plugin install lilystack --marketplace frogfarmin/Lilystack`.
+  `claude plugin marketplace add frogfarmin/Lilystack`, then
+  `claude plugin install lilystack@lilystack`.
   `.claude-plugin/marketplace.json` makes this possible. It keeps its state in
   `~/.claude/plugins/`, outside Lilypad. It was tested on 2026-11-06 in a
   cloud container: add, install, enable, uninstall and remove all worked.
@@ -122,8 +123,10 @@ desktop app, which does not read zsh files.
 - a paragraph in `Claude/README.md`;
 - one restore step in the top README: clone Lilystack (for `bin/lily`).
 
-**State.** Only `~/.lilystack/freeze/<project-key>` for the freeze boundary.
-There is no other state, no analytics and no network.
+**State.** The plugin keeps only `~/.lilystack/freeze/<project-key>` for the
+freeze boundary. The mods keep their own state: each mod's README tells what
+and where (for example, focus keeps its list in the mod store, and verify-gate
+uses a temporary index in `.git/`). There are no analytics and no network calls.
 
 **Upstream.** `NOTICE.md` gives the pin of each upstream. To re-sync, read
 each upstream again and compare it with its pin. No script does this.
@@ -203,13 +206,13 @@ Lilystack uses these features of Claude Code (2.1.318).
 | Feature | Where | Why |
 |---|---|---|
 | Hooks in skill frontmatter | careful, secrets, secure, test-first, freeze, guard | A guard is active only after you call it. Then it is active until the session ends |
-| `disable-model-invocation: true` | ship, unfreeze, lily-sweep and each skill with a hook | Only you can start these skills |
+| `disable-model-invocation: true` | ship, unfreeze, lily-sweep, second-opinion and each skill with a hook | Only you can start these skills |
 | `disallowed-tools` | retro | A skill that only reports cannot edit while it runs |
 | Plugin agents with a `tools` list | `agents/lens.md` | The lens can read, but it cannot write or run a command. Each agent declares its tools |
 | Plugin output styles | `output-styles/ste.md` | Replies in Simplified Technical English, when you choose it with `/output-style` |
 | `claude plugin eval` | `evals/` | Proof that each description starts its skill. Trigger cases use graders that need no model |
 | A marketplace | `.claude-plugin/marketplace.json` | A second way to install, from the folder or from GitHub |
-| `claude plugin details` | the README | The cost of the plugin in tokens: about 1,500 tokens in each session before a skill starts (`claude plugin details lilystack`) |
+| `claude plugin details` | the README | The cost of the plugin in tokens: about 2,100 tokens in each session before a skill starts (`claude plugin details lilystack`) |
 | A plugin icon | `.claude-plugin/icon.png` | `claude plugin validate .` passes with no warning |
 | Mods (TypeScript hooks modules) | `mods/` | A band, a pane, a model tool or a merge stop needs the mods API. Bash cannot draw in the app. Each mod is self-contained, has its own tests (`claude plugin test`), and makes no network call (rule 1) |
 | Marketplace entries for mods | `.claude-plugin/marketplace.json` | The desktop app does not read zsh files, so `CLAUDE_CODE_PLUGIN_DIRS` does not reach it. A marketplace entry with a relative path is read from the clone itself |
@@ -233,8 +236,8 @@ replaces `${CLAUDE_PLUGIN_ROOT}` with the plugin folder.
 Each hook reads the payload with jq. careful, secrets and secure read a plain
 rules file beside the script (`hooks/*-patterns.txt`), so a change to a rule
 is a change to one line. freeze and test-first keep their few rules in the
-script. `hooks/lib-path.sh` holds the path resolver that freeze, secrets and
-test-first share.
+script. `hooks/lib-path.sh` holds the path resolver that freeze, secrets,
+secure and test-first share.
 
 | Hook | Tools (matcher) | Answers |
 |---|---|---|

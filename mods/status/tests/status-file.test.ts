@@ -33,9 +33,48 @@ test('a file with no headings becomes Notes', async () => {
   expect(f.rest).toBe('## Notes\njust some words\n')
 })
 
-test('non-entry lines inside an owned section are dropped on rewrite', async () => {
-  const f = parseStatus(SAMPLE.replace('## Next\n', '## Next\nstray prose\n'))
-  expect(formatStatus(f, '2026-11-03 14:12', '01LwwLJi')).toBe(SAMPLE)
+const fmt = (text: string) => formatStatus(parseStatus(text), '2026-11-03 14:12', '01LwwLJi')
+
+test('non-entry lines inside an owned section are kept on rewrite', async () => {
+  const text = SAMPLE.replace('## Next\n', '## Next\nstray prose\n')
+  expect(fmt(text)).toBe(text)
+})
+
+test('indented and prose lines under an entry stay under it', async () => {
+  const text = SAMPLE.replace('- Deploy to the server\n', '- Deploy to the server\n  - ssh in first\n  then run make deploy\n')
+    .replace('- Approve docs/designs/m4-memory.md section 3\n', '- Approve docs/designs/m4-memory.md section 3\nSee the open question.\n')
+    .replace('- 2026-11-03: Drafted the M4 memory design\n', '- 2026-11-03: Drafted the M4 memory design\n  (with the old notes)\n')
+  expect(fmt(text)).toBe(text)
+})
+
+test('an undated Done line is kept, by parse, format and merge', async () => {
+  const text = SAMPLE.replace('## Done\n', '## Done\n- Set up the repo\n')
+  const f = parseStatus(text)
+  expect(f.done).toEqual([{ date: '', text: 'Set up the repo' }, { date: '2026-11-03', text: 'Drafted the M4 memory design' }])
+  expect(fmt(text)).toBe(text)
+  const m = mergeStatus(f, [t({ subject: 'New thing', status: 'completed', completedOn: '2026-12-30' })], '2026-12-30')
+  expect(m.done).toEqual([{ date: '2026-12-30', text: 'New thing' }, { date: '', text: 'Set up the repo' }])
+})
+
+test('the original title line and the paragraph under it are kept', async () => {
+  const text = '# My project\nA paragraph about it.\nIt has two lines.\n\n## Next\n- One\n\n## Notes\nx\n'
+  const once = fmt(text)
+  expect(once).toBe('# My project\nUpdated 2026-11-03 14:12 by Claude Code (session 01LwwLJi)\n\nA paragraph about it.\nIt has two lines.\n\n## Next\n- One\n\n## Waiting on you\n\n## Done\n\n## Notes\nx\n')
+  expect(fmt(once)).toBe(once)
+  expect(parseStatus(text).title).toBe('My project')
+})
+
+test('a paragraph under a Status title round-trips', async () => {
+  const text = SAMPLE.replace('(session 01LwwLJi)\n', '(session 01LwwLJi)\n\nThe brief job and the M4 memory work.\n')
+  expect(fmt(text)).toBe(text)
+})
+
+test('lines under an entry follow it to Done when its task completes', async () => {
+  const text = SAMPLE.replace('- Deploy to the server\n', '- Deploy to the server\n  - ssh in first\n')
+  const m = mergeStatus(parseStatus(text), [t({ subject: 'Deploy to the server', status: 'completed', completedOn: '2026-11-04' })], '2026-11-04')
+  const out = formatStatus(m, '2026-11-04 09:00', '01LwwLJi')
+  expect(out).toContain('## Done\n- 2026-11-04: Deploy to the server\n  - ssh in first\n- 2026-11-03')
+  expect(out.match(/ssh in first/g)?.length).toBe(1)
 })
 
 test('entryLine flattens a subject', async () => {

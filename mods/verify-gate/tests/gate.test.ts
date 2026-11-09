@@ -1,5 +1,5 @@
 import { expect, test } from 'claude-code/testing'
-import { bandRows, checksIn, emptyState, isMergeCommand, parseConf, parseGitStatus, report, segments, verdict } from '../hooks/gate.ts'
+import { bandRows, checksIn, emptyState, isMergeCommand, parseConf, parseGitStatus, recordRun, report, segments, verdict } from '../hooks/gate.ts'
 import type { GateState } from '../hooks/gate.ts'
 
 const FIVE = ['zsh tests/lint-skills.zsh', 'zsh tests/test-lint.zsh', 'zsh tests/test-hooks.zsh', 'zsh tests/test-lily.zsh', 'claude plugin validate .']
@@ -23,7 +23,7 @@ test('segments split chains, strip subshells and env, and mark pipes', async () 
 test('checks: required prefixes, known commands, and pipes that never count', async () => {
   expect(checksIn('zsh tests/lint-skills.zsh && zsh tests/test-hooks.zsh', FIVE).counted).toEqual(['zsh tests/lint-skills.zsh', 'zsh tests/test-hooks.zsh'])
   expect(checksIn('zsh tests/lint-skills.zsh-old', FIVE).counted).toEqual([])
-  expect(checksIn('zsh tests/test-lily.zsh | tail', FIVE)).toEqual({ counted: [], piped: ['zsh tests/test-lily.zsh'] })
+  expect(checksIn('zsh tests/test-lily.zsh | tail', FIVE)).toEqual({ counted: [], hidden: ['zsh tests/test-lily.zsh'] })
   expect(checksIn('npm run test -- --watch=false', []).counted).toEqual(['npm run test -- --watch=false'])
   expect(checksIn('cargo test && ls', []).counted).toEqual(['cargo test'])
   expect(checksIn('npm install', []).counted).toEqual([])
@@ -114,4 +114,55 @@ test('the report lists each check and the tree', async () => {
   expect(text).toContain('verify-gate: ⛔ NOT APPROVED: 1 of 5 checks to run, 1 file not committed')
   expect(text).toContain('○ claude plugin validate .  not run')
   expect(text).toContain('Tree: 1 file not committed')
+})
+
+test('a check counts only when every operator after it is &&', async () => {
+  expect(checksIn('zsh tests/lint-skills.zsh || true', FIVE).counted).toEqual([])
+  expect(checksIn('zsh tests/lint-skills.zsh ; echo done', FIVE).counted).toEqual([])
+  expect(checksIn('zsh tests/lint-skills.zsh\necho done', FIVE).counted).toEqual([])
+  expect(checksIn('zsh tests/lint-skills.zsh &', FIVE).counted).toEqual([])
+  expect(checksIn('zsh tests/lint-skills.zsh & zsh tests/test-lint.zsh', FIVE).counted).toEqual(['zsh tests/test-lint.zsh'])
+  expect(checksIn('zsh tests/lint-skills.zsh && zsh tests/test-lint.zsh || echo no', FIVE).counted).toEqual([])
+  expect(checksIn('(zsh tests/lint-skills.zsh) ; ls', FIVE).counted).toEqual([])
+  expect(checksIn('echo go ; zsh tests/lint-skills.zsh', FIVE).counted).toEqual(['zsh tests/lint-skills.zsh'])
+  expect(checksIn('zsh tests/lint-skills.zsh 2>&1 && zsh tests/test-lint.zsh >/dev/null 2>&1', FIVE).counted).toEqual(['zsh tests/lint-skills.zsh', 'zsh tests/test-lint.zsh'])
+  expect(checksIn('zsh tests/lint-skills.zsh || true', FIVE).hidden).toEqual(['zsh tests/lint-skills.zsh'])
+})
+
+test('a failure stays until that same check passes', async () => {
+  let st = emptyState()
+  st = recordRun(st, ['bun test'], false, 1, null)
+  expect(st.lastFailed).toBe('bun test')
+  st = recordRun(st, ['tsc'], true, 2, null)
+  expect(st.lastFailed).toBe('bun test')
+  expect(verdict({ ...st, git: null }).reasons).toEqual(['a check failed'])
+  st = recordRun(st, ['bun test'], true, 3, null)
+  expect(st.lastFailed).toBe(null)
+  expect(verdict({ ...st, git: null }).status).toBe('approved')
+})
+
+test('a merge hides behind no prefix, flag, api call or shell wrapper', async () => {
+  for (const c of [
+    'env gh pr merge 1',
+    'env GH_TOKEN=x gh pr merge 1',
+    'command gh pr merge 1',
+    'sudo gh pr merge 1',
+    'nohup gh pr merge 1',
+    'timeout 30 gh pr merge 1',
+    'gh -R o/r pr merge 1',
+    'gh --repo o/r pr merge 1',
+    'gh --repo=o/r pr merge 1',
+    'gh api -X PUT repos/o/r/pulls/7/merge',
+    'gh api --method PUT /repos/{owner}/{repo}/pulls/7/merge -f merge_method=squash',
+    'bash -c "gh pr merge 1"',
+    "sh -c 'git fetch && gh pr merge 1'",
+    'zsh -lc "env gh pr merge 1"',
+  ]) expect([c, isMergeCommand(c)]).toEqual([c, true])
+  for (const c of ['gh pr view 1', 'gh api repos/o/r/pulls/7', 'bash -c "gh pr view 1"', 'git merge main', 'env FOO=1 ls']) {
+    expect([c, isMergeCommand(c)]).toEqual([c, false])
+  }
+})
+
+test('a check with no tree is stale when the tree now is known', async () => {
+  expect(verdict(s({ runs: allPass(10, null as unknown as string) })).status).toBe('blocked')
 })

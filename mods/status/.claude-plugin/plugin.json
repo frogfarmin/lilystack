@@ -1,6 +1,6 @@
 {
   "name": "status",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Keeps STATUS.md true and shows the checklist, the current activity and what waits on you above the prompt",
   "author": { "name": "SJ" }
 }

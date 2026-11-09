@@ -1,6 +1,6 @@
 {
   "name": "outbound-ledger",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Records each outward action of the session (pushes, gh calls, web fetches, MCP writes, Artifact publishes) in a read-only pane",
   "author": { "name": "SJ" },
   "types": "./types/index.d.ts"

@@ -4,9 +4,9 @@
 - Use the new skills on a real project. The seven skills of the first harvest had a dry run on test repos on 2026-11-06. The seven of the second harvest passed their trigger evals, but they had no dry run yet (see `docs/verification-log.md`).
 
 ## Waiting on you
-- In the desktop app, install `focus`, `verify-gate` and `outbound-ledger` from the lilystack marketplace (+, then Plugins).
+- In the desktop app, check that `/plugin` shows `focus`, `verify-gate` and `outbound-ledger`. Lilypad's `settings.json` already enables them; if one is missing, install it from the lilystack marketplace (+, then Plugins).
 - On each Mac, in this order: pull Lilystack, pull Lilypad, run `~/Lilypad/bin/lily check`.
-- On the main Mac, point `~/.zshrc.local` at `$HOME/Lilystack/mods/status` (Lilypad `Claude/README.md`, section "Status mod").
+- Decide how the status mod loads. The desktop app does not read `~/.zshrc.local`, so the `CLAUDE_CODE_PLUGIN_DIRS` line in `mods/status/README.md` works only in the terminal. To use it in the app, add status to the marketplace (AGENTS.md says that the marketplace lists all mods but status).
 
 ## Done
 - 2026-11-07: Three new mods, each with tests: verify-gate (an APPROVED stamp and a stop on PR merges), outbound-ledger (a pane of outward actions) and focus (one main action, then the tasks after it, checked off in a pane). The marketplace lists them. A headless session loaded all three with no hook errors.

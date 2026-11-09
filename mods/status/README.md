@@ -10,17 +10,37 @@
 This mod is not a part of the lilystack plugin. It loads only where
 `CLAUDE_CODE_PLUGIN_DIRS` names this folder.
 
+## What it keeps in STATUS.md
+
+The mod owns three sections: `## Next`, `## Waiting on you` and `## Done`. It
+writes their entries again from the task list. It does not remove your text:
+
+- It keeps the title line as you wrote it, and the paragraph under it. It
+  writes its own `Updated` line under the title.
+- It keeps a line in an owned section that is not an entry, for example
+  prose or an indented sub-item. The line stays under the entry above it. When
+  the task of that entry completes, the line moves with the entry to Done.
+  When the task is deleted, its lines go with it.
+- It keeps a Done line with no date (`- Set up the repo`). The 14-day cut
+  does not remove it. It goes after the dated lines.
+- It keeps all text after the owned sections, `## Notes` too.
+
 ## How it loads
 
 It loads on the main Mac only, in the author's setup. To use it yourself, add this folder to `CLAUDE_CODE_PLUGIN_DIRS`.
 
 - `~/.zshrc.local` on the main Mac adds `$HOME/Lilystack/mods/status` to
-  `CLAUDE_CODE_PLUGIN_DIRS`. This file is outside the two repos.
-- Lilypad's `shell/zshrc` sets the first part of that variable, for Lilystack.
+  `CLAUDE_CODE_PLUGIN_DIRS`. This file is outside the two repos:
+
+  ```sh
+  export CLAUDE_CODE_PLUGIN_DIRS="$HOME/Lilystack/mods/status${CLAUDE_CODE_PLUGIN_DIRS:+:$CLAUDE_CODE_PLUGIN_DIRS}"
+  ```
+
 - The second Mac has no such line. For this reason, the mod does not load there.
 - `/plugin` shows the mod as `status@inline`.
-
-The exact line is in Lilypad's `Claude/README.md`, in the section "Status mod".
+- The variable works only where Claude Code starts from a zsh that reads
+  `~/.zshrc`. The desktop app does not read zsh files, so the mod does not
+  load there.
 
 ## Files
 

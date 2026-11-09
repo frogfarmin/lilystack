@@ -149,3 +149,22 @@ test('fromStore declines junk and keeps the counter above every id', async () =>
   expect(l.seq).toBe(9)
   expect(l.after.length).toBe(1)
 })
+
+const full = () => setList(empty(), 'm', ['1', '2', '3', '4', '5', '6'], T)
+
+test('addAfter refuses a seventh task after the main action', async () => {
+  const l = full()
+  expect(addAfter(l, 'seven', T)).toBe(l)
+})
+
+test('setMain refuses when the old main action has no room in the six after', async () => {
+  const l = full()
+  expect(setMain(l, 'urgent', T)).toBe(l)
+  expect(setMain(checkAfter(l, 'f7', T), 'urgent', T).after.length).toBe(6)
+})
+
+test('reopen refuses when the six after are full, and the item stays done', async () => {
+  const l = { ...full(), done: [{ id: 'f0', text: 'old', doneAt: T }] }
+  expect(reopen(l, 'f0', T)).toBe(l)
+  expect(reopen({ ...l, main: null }, 'f0', T).main?.text).toBe('old')
+})

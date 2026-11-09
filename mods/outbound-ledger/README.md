@@ -17,7 +17,7 @@ This mod is not a part of the lilystack plugin. You install it by itself
 |---|---|---|
 | Bash `git` | `push` | `fetch`, `pull`, `clone`, `ls-remote` |
 | Bash `gh` | `pr create/merge/comment/review/edit/close/ready`, `issue create/comment/edit/close`, `release create`, `repo create`, `gh api` with a write method or fields | all other `gh` calls |
-| Bash `curl`, `wget` | a write method, or data, a form or an upload | all other calls |
+| Bash `curl`, `wget` | a write method (`-X POST`, `-XPOST`, `--request=POST`), or data (`-d`, `--data*`, `--json`), a form or an upload | all other calls |
 | Bash publish | `npm/pnpm/yarn publish`, `cargo publish`, `twine upload`, `gem push` | |
 | Bash remote | `ssh`, `scp` and `rsync` to a `host:` | |
 | Bash install | | `npm/pnpm/yarn/bun install` or `add`, `pip install`, `brew install` |
@@ -27,6 +27,9 @@ This mod is not a part of the lilystack plugin. You install it by itself
 
 A Bash command with more than one outward part gets one row. A part that sends
 has priority. The row tells how many more parts there are.
+
+The mod looks past `sudo`, `env`, `command`, `nohup`, `time`, `timeout N` and
+`VAR=value` in front of a command.
 
 The tools of the three Lilystack mods (`outbound-ledger`, `verify-gate`,
 `focus`) are not recorded.
@@ -39,10 +42,18 @@ The tools of the three Lilystack mods (`outbound-ledger`, `verify-gate`,
 - The result: `pending`, `ok`, `error` (red) or `denied` (yellow).
 - `(agent)` when a subagent made the call.
 
-Before a row is kept, the mod masks tokens and secret values (GitHub tokens,
-`sk-` keys, Slack tokens, AWS key IDs, `Bearer` and `Authorization` values, and
-`token=`, `key=`, `password=`, `secret=` values). Then it cuts the text to 120
-characters. The mod keeps the last 300 rows.
+Before a row is kept, the mod masks tokens and secret values. Then it cuts the
+text to 120 characters. The mod keeps the last 300 rows. It masks these:
+
+- GitHub tokens, `sk-` keys, Slack tokens and AWS key IDs.
+- `Bearer` and `Authorization` values, and the value of a header such as
+  `X-Api-Key`, `X-Auth-Token` or `X-Client-Secret`.
+- The user and password in a URL (`https://user:pass@host` becomes
+  `https://***@host`), and a `user:pass` value after `-u` or `--user`.
+- `token=`, `key=`, `password=` and `secret=` values, also with a prefix that
+  ends in `_` (`client_secret=`, `private_key=`, `X_API_KEY=`).
+- JSON values of `password`, `token`, `secret` and `api_key` (also
+  `client_secret` and others with a `_` prefix).
 
 ## How to use it
 

@@ -38,19 +38,24 @@ export function parseConf(text: string): string[] {
 }
 
 export type Segment = { text: string; isPiped: boolean }
+type Part = { text: string; after: string[] } // a simple command and every operator after it
 
-// The simple commands of a shell line, split on && || ; and newlines. A segment
-// that feeds a pipe is marked: its exit code is lost, so it cannot count as a pass.
-export function segments(command: string): Segment[] {
-  const out: Segment[] = []
-  for (const part of command.split(/&&|\|\||;|\n/)) {
-    const piped = part.split(/(?<!\|)\|(?!\|)/)
-    piped.forEach((p, i) => {
-      const text = squash(p.replace(/^[\s(]+|[\s)]+$/g, '').replace(/^(\w+=\S*\s+)+/, ''))
-      if (text) out.push({ text, isPiped: i < piped.length - 1 })
-    })
+// The operators: && || |& | ; newline, and & that sends to the background (not >&, &> or 2>&1).
+const OPERATOR = /(&&|\|\||\|&|\||;|\n|(?<![<>&])&(?![>&]))/
+
+function parts(command: string): Part[] {
+  const pieces = command.split(OPERATOR) // odd indexes are the operators
+  const out: Part[] = []
+  for (let i = 0; i < pieces.length; i += 2) {
+    const text = squash(pieces[i].replace(/^[\s(]+|[\s)]+$/g, '').replace(/^(\w+=\S*\s+)+/, ''))
+    if (text) out.push({ text, after: pieces.filter((_, j) => j > i && j % 2 === 1) })
   }
   return out
+}
+
+// The simple commands of a shell line. A segment that feeds a pipe is marked.
+export function segments(command: string): Segment[] {
+  return parts(command).map(({ text, after }) => ({ text, isPiped: after[0] === '|' || after[0] === '|&' }))
 }
 
 const KNOWN: RegExp[] = [
@@ -71,19 +76,43 @@ export function checkOf(segment: string, required: string[]): string | null {
   return KNOWN.some((re) => re.test(text)) ? text : null
 }
 
-// The checks a Bash command runs. A piped check is listed under `piped` and never counts.
-export function checksIn(command: string, required: string[]): { counted: string[]; piped: string[] } {
+// The checks a Bash command runs. A check counts only when every operator after it
+// is &&: a pipe, ||, ;, a newline or & hides its exit code. Those are `hidden`.
+export function checksIn(command: string, required: string[]): { counted: string[]; hidden: string[] } {
   const counted: string[] = []
-  const piped: string[] = []
-  for (const s of segments(command)) {
-    const check = checkOf(s.text, required)
+  const hidden: string[] = []
+  for (const p of parts(command)) {
+    const check = checkOf(p.text, required)
     if (check === null) continue
-    ;(s.isPiped ? piped : counted).push(check)
+    ;(p.after.every((op) => op === '&&') ? counted : hidden).push(check)
   }
-  return { counted, piped }
+  return { counted, hidden }
 }
 
-export const isMergeCommand = (command: string): boolean => segments(command).some((s) => /^gh pr merge\b/.test(s.text))
+// The state after a run of `checks`. A failure stays until that same check passes.
+export function recordRun(s: GateState, checks: string[], ok: boolean, at: number, fp: string | null): GateState {
+  const runs = { ...s.runs }
+  for (const check of checks) runs[check] = { command: check, ok, at, fp }
+  const lastFailed = ok ? (Object.values(runs).find((r) => !r.ok)?.command ?? null) : checks[0]
+  return { ...s, runs, lastFailed, edited: ok ? [] : s.edited }
+}
+
+// Words that run the next command: env, command, sudo, nohup, exec, time, timeout N.
+const PREFIX = /^(?:["'(]+|\w+=\S*\s+|env(?:\s+-\S+)*\s+|command\s+|sudo(?:\s+-\S+)*\s+|nohup\s+|exec\s+|time\s+|timeout(?:\s+-\S+)*\s+\S+\s+)/
+const GH_MERGE = /^gh\s+(?:(?:-R|--repo)(?:\s+|=)\S+\s+)*pr\s+merge\b/
+const GH_API_MERGE = /^gh\s+api\b.*\bpulls\/[^/\s]+\/merge\b/
+const SHELL_C = /\b(?:bash|sh|zsh)\s+(?:-\w+\s+)*-\w*c\w*\s+(?:"([^"]*)"|'([^']*)')/g
+
+function unwrap(text: string): string {
+  for (let prev = ''; prev !== text; ) { prev = text; text = text.replace(PREFIX, '') }
+  return text
+}
+
+// A PR merge: gh pr merge or gh api .../pulls/N/merge, also behind a prefix, gh -R, or sh -c "...".
+export function isMergeCommand(command: string): boolean {
+  for (const m of command.matchAll(SHELL_C)) if (isMergeCommand(m[1] ?? m[2])) return true
+  return parts(command).some((p) => { const t = unwrap(p.text); return GH_MERGE.test(t) || GH_API_MERGE.test(t) })
+}
 
 // `git status --porcelain=v1 --branch`: the branch line, then one line per path.
 export function parseGitStatus(text: string): Omit<GitFacts, 'fp'> {
@@ -103,7 +132,7 @@ export function verdict(s: GateState): Verdict {
   let next: string | null = null
   const fp = s.git?.fp ?? null
   const fresh = (run: CheckRun | undefined): boolean =>
-    run !== undefined && run.ok && (s.lastEditAt === null || run.at > s.lastEditAt) && (fp === null || run.fp === null || run.fp === fp)
+    run !== undefined && run.ok && (s.lastEditAt === null || run.at > s.lastEditAt) && (fp === null || run.fp === fp)
 
   let passed: number
   let total: number
@@ -174,7 +203,7 @@ export function report(s: GateState): string {
     lines.push('', `Branch: ${s.git.branch ?? '?'}`, `Tree: ${s.git.dirty === 0 ? 'clean' : plural(s.git.dirty, 'file') + ' not committed'}`)
     lines.push(`Push: ${!s.git.hasUpstream ? 'no upstream' : s.git.ahead === 0 ? 'up to date' : plural(s.git.ahead, 'commit') + ' not pushed'}`)
   } else lines.push('', 'Not a git repo: the gate uses the checks only.')
-  lines.push('', 'A check in a pipe (cmd | tail) does not count: the pipe hides its exit code.')
+  lines.push('', 'A check followed by |, ||, ;, a new line or & does not count: that hides its exit code.')
   return lines.join('\n')
 }
 

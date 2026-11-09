@@ -33,6 +33,12 @@ time is easier to start and to finish.
 
 The status line shows `🎯 <main action> · N after`.
 
+The list holds six tasks after the main action at most. When the six are
+full, `/then`, `/main <task>` and a press on a done task do not add a task.
+They tell you that the list is full. Check off a task first. Nothing is
+dropped. When Claude sets the list with more than six tasks after, the mod
+keeps the first six, and the tool result tells Claude how many it dropped.
+
 ## What Claude does with it
 
 - The mod gives Claude two tools: `mcp__focus__set` and `mcp__focus__check`.

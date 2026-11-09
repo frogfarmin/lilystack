@@ -9,11 +9,14 @@
    - all changes are committed,
    - all commits are pushed.
 2. Until the stamp says APPROVED, it stops a PR merge: `gh pr merge`,
-   `mcp__github__merge_pull_request` and `mcp__github__enable_pr_auto_merge`.
-   The deny message tells Claude what to do next. It also stops a merge when
-   it cannot read a git repo, because then it cannot see what is committed. A
-   local `git merge` is not stopped, because `ship` uses it to merge the base
-   into the branch.
+   `gh api .../pulls/N/merge`, `mcp__github__merge_pull_request` and
+   `mcp__github__enable_pr_auto_merge`. It also finds `gh pr merge` after
+   `env`, `command`, `sudo`, `nohup`, `time` or `timeout N`, after
+   `gh -R o/r` or `gh --repo o/r`, and inside `bash -c "..."` (also `sh` and
+   `zsh`). The deny message tells Claude what to do next. It also stops a
+   merge when it cannot read a git repo or when git fails, because then it
+   cannot see what is committed. A local `git merge` is not stopped, because
+   `ship` uses it to merge the base into the branch.
 3. At the end of a turn with edits and no check after them, it shows a toast.
 
 This mod is not a part of the lilystack plugin. You install it by itself
@@ -39,9 +42,14 @@ lists the five checks of `AGENTS.md`.
 
 - A command counts when it starts with a line of the file. For example,
   `zsh tests/lint-skills.zsh && zsh tests/test-hooks.zsh` counts for two checks.
-- A check in a pipe (`zsh tests/test-lily.zsh | tail`) does not count. The
-  pipe hides the exit code.
+- A check counts only when each operator after it is `&&`. A check before
+  `|`, `||`, `;`, a new line or `&` does not count, because then the exit
+  code of the command is not the exit code of the check. For example,
+  `zsh tests/test-lily.zsh | tail` and `zsh tests/test-lily.zsh || true` do
+  not count.
 - A check that runs in the background does not count.
+- A failed check stays failed until that same check passes. A pass of a
+  different check does not clear it.
 - With no conf file, one pass of a known test or lint command is enough:
   `npm test`, `bun test`, `pytest`, `cargo test`, `go test`, `make test`,
   `tsc`, `zsh tests/…`, `claude plugin validate`, and others (`hooks/gate.ts`).
@@ -50,9 +58,11 @@ lists the five checks of `AGENTS.md`.
 
 After each check run, at the end of each turn, before a merge, and on `/gate`,
 the mod calculates the tree that `git add -A && git commit` would make. The
-mod uses a copy of the index, `.git/verify-gate.index`. It does not change
+mod uses a copy of the index, `.git/verify-gate-<id>.index`. Each calculation
+has its own copy, and the mod removes the copy after it. It does not change
 your real index or your files. Because a commit does not change that tree, a
-check that passed before the commit is still good after the commit.
+check that passed before the commit is still good after the commit. A check
+with no known tree does not count when the mod knows the tree now.
 
 `git add -A` on the copy writes blob objects into `.git/objects`. `git gc`
 removes them when nothing uses them.
@@ -67,7 +77,8 @@ project, and a check from the old folder does not count.
 
 ## What it can reach
 
-- It runs `git` and `cp` on your computer, in the project root.
+- It runs `git`, `cp` and `rm` on your computer, in the project root. `rm`
+  removes only its own copy of the index.
 - It reads `.claude/verify-gate.conf`.
 - It makes no network call and no model call. It sends nothing out.
 

@@ -186,3 +186,53 @@ test('a session moved out of a spare folder loads the open list of the project',
   expect(String(check.result)).toContain('Checked off: Pick the shortlist.')
   expect(toasts).toContain('Still open from last time: Pick the shortlist')
 })
+
+test('/then and /main say so when the six after are full', async ($, on) => {
+  const six = ['a', 'b', 'c', 'd', 'e', 'f'].map((text, i) => ({ id: 'f' + (i + 2), text }))
+  await start($, on, { [KEY]: { ...stored, after: six, seq: 7 } })
+  const run = async (command: string, args = '') =>
+    (await $.command.run({ command, args, origin: { kind: 'composer' }, presentation: { isFullscreen: false, columns: 80 } } as never))?.text
+  expect(await run('then', 'seven')).toBe('The list is full: six tasks after the main action. Check one off first.')
+  expect(await run('main', 'urgent')).toBe('The list is full: six tasks after the main action. Check one off first.')
+})
+
+test('a done item stays done when the six after are full', async ($, on) => {
+  const six = ['a', 'b', 'c', 'd', 'e', 'f'].map((text, i) => ({ id: 'f' + (i + 2), text }))
+  const { toasts } = await start($, on, { [KEY]: { ...stored, after: six, done: [{ id: 'f0', text: 'Old task', doneAt: T }], seq: 7 } })
+  const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  await ui.press({ key: 'done-f0' })
+  expect(await ui.find({ key: 'done-f0' })).toBeDefined()
+  expect(await ui.find({ key: 'after-f0' })).toBeUndefined()
+  await ui.unmount()
+  expect(toasts).toContain('The list is full: six tasks after the main action. Check one off first.')
+})
+
+test('only the first nine tasks after get a hotkey', async ($, on) => {
+  // A list that an earlier version stored can hold more than six after.
+  const many = Array.from({ length: 10 }, (_, i) => ({ id: 'f' + (i + 2), text: 't' + i }))
+  await start($, on, { [KEY]: { ...stored, after: many, seq: 11 } })
+  const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect((await ui.find({ key: 'after-f10' }))?.props.hotkey).toBe('9')
+  expect((await ui.find({ key: 'after-f11' }))?.props.hotkey).toBeUndefined()
+  await ui.unmount()
+})
+
+test('two checks at once both land', async ($, on) => {
+  await start($, on, { [KEY]: stored })
+  await Promise.all([
+    $.tool.call({ tool: 'mcp__focus__check', item: 'Read the mods' }),
+    $.tool.call({ tool: 'mcp__focus__check', item: 'Run the checks' }),
+  ])
+  const ui = await $.ui.mount({ ...PANE, surface: 'desktop' })
+  expect(await ui.find({ key: 'done-f2' })).toBeDefined()
+  expect(await ui.find({ key: 'done-f3' })).toBeDefined()
+  expect(await ui.find({ key: 'after-f2' })).toBeUndefined()
+  expect(await ui.find({ key: 'after-f3' })).toBeUndefined()
+  await ui.unmount()
+})
+
+test('a folder with no slash (C:\\proj) ends the search for .git', async ($, on) => {
+  await start($, on, {}, { root: 'C:\\proj' })
+  const set = await $.tool.call({ tool: 'mcp__focus__set', main: 'Ship' })
+  expect(String(set.result)).toContain('Main: Ship.')
+})

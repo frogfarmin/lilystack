@@ -27,3 +27,14 @@ test('no git root: /now says so and nothing is read', async ($, on) => {
   expect((await $.command.run({ command: 'now', args: '' })).text).toBe('No project root (no .git above /tmp/x)')
   expect(reads).toEqual([])
 })
+
+test('a folder with no slash (C:\\proj) ends the search for .git', async ($, on) => {
+  on('session.start', () => ({ cwd: 'C:\\proj' }))
+  on('command.register', () => ({ value: undefined }))
+  on('fs.exists', () => ({ value: false }))
+  on('fs.read', () => ({ value: '' }))
+  on('session.id', () => ({ value: 'abc' }))
+  on('tool.call', () => ({ result: { tasks: [] } }))
+  await $.session.start({ surface: 'terminal', isInteractive: true, cwd: 'C:\\proj' })
+  expect((await $.command.run({ command: 'now', args: '' })).text).toBe('No project root (no .git above C:\\proj)')
+})

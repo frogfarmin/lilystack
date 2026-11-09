@@ -29,9 +29,13 @@ export function redact(text: string): string {
     .replace(/\bsk-[A-Za-z0-9_-]{8,}/g, 'sk-***')
     .replace(/\bxox[abpr]-[A-Za-z0-9-]{6,}/g, 'xox-***')
     .replace(/\bAKIA[0-9A-Z]{12,}/g, 'AKIA***')
+    .replace(/\/\/[^/\s@'"]+@/g, '//***@') // URL userinfo: //user:pass@
+    .replace(/((?:^|\s)(?:-u\s*|--user[=\s]\s*))("[^"]*:[^"]*"|'[^']*:[^']*'|[^\s'"]*:[^\s'"]*)/g, '$1***') // curl -u user:pass
     .replace(/(Authorization:\s*)(Bearer\s+|Basic\s+|token\s+)?[^\s'"]+/gi, '$1***')
+    .replace(/\b(X-[A-Za-z0-9-]*(?:Key|Token|Secret):\s*)[^\s'"]+/gi, '$1***') // X-Api-Key: v
     .replace(/\bBearer\s+[^\s'"]+/gi, 'Bearer ***')
-    .replace(/\b(token|key|password|secret|api_key|apikey|access_token)=([^\s&'"]+)/gi, '$1=***')
+    .replace(/\b((?:\w*_)?(?:token|key|password|secret|apikey|access_token))=([^\s&'"]+)/gi, '$1=***') // also client_secret=
+    .replace(/("(?:\w*_)?(?:password|token|secret|api_key|apikey)"\s*:\s*")[^"]*"/gi, '$1***"') // JSON "password": "v"
   if (out.length > MAX) out = out.slice(0, MAX - 1) + '…'
   return out
 }
@@ -42,9 +46,16 @@ function words(segment: string): string[] {
   const re = /"([^"]*)"|'([^']*)'|(\S+)/g
   let m: RegExpExecArray | null
   while ((m = re.exec(segment)) !== null) out.push(m[1] ?? m[2] ?? m[3] ?? '')
-  // Drop env assignments and wrappers in front of the command.
-  while (out.length > 0 && (/^[A-Za-z_][A-Za-z0-9_]*=/.test(out[0] ?? '') || out[0] === 'sudo' || out[0] === 'env' || out[0] === 'command')) out.shift()
-  return out
+  // Drop env assignments and wrappers in front of the command: sudo, env, command, nohup, time, timeout N.
+  for (;;) {
+    const first = out[0] ?? ''
+    if (/^[A-Za-z_][A-Za-z0-9_]*=/.test(first) || ['sudo', 'env', 'command', 'nohup', 'time'].includes(first)) out.shift()
+    else if (first === 'timeout') {
+      out.shift()
+      while ((out[0] ?? '').startsWith('-')) out.splice(0, /^(-s|-k|--signal|--kill-after)$/.test(out[0] ?? '') ? 2 : 1)
+      out.shift() // the duration
+    } else return out
+  }
 }
 
 export function segments(command: string): string[] {
@@ -55,7 +66,7 @@ export function segments(command: string): string[] {
 }
 
 function hostOf(url: string): string | null {
-  const m = /^https?:\/\/([^/?#:@]+@)?([^/?#:]+)/i.exec(url)
+  const m = /^https?:\/\/([^/?#@]+@)?([^/?#:]+)/i.exec(url)
   return m && m[2] ? m[2].toLowerCase() : null
 }
 
@@ -112,11 +123,13 @@ function bashSegment(w: string[]): Outward | null {
   if (cmd === 'curl' || cmd === 'wget') {
     const url = firstUrl(w)
     const target = (url && hostOf(url)) ?? 'unknown host'
+    // The method: -X POST, -XPOST, --request POST, --request=POST, wget --method=POST.
     const methodAt = w.findIndex((x) => x === '-X' || x === '--request')
-    const method = methodAt >= 0 ? (w[methodAt + 1] ?? '').toUpperCase() : ''
+    const attached = w.map((x) => /^(?:-X|--request=|--method=)(\w+)$/.exec(x)?.[1]).find(Boolean) ?? ''
+    const method = (methodAt >= 0 ? (w[methodAt + 1] ?? '') : attached).toUpperCase()
     const sends =
       /^(POST|PUT|PATCH|DELETE)$/.test(method) ||
-      w.some((x) => /^(-d|-F|-T|--form|--upload-file|--post-data|--post-file|--method=(POST|PUT|PATCH|DELETE))$/i.test(x) || /^--data/.test(x) || /^-d./.test(x))
+      w.some((x) => /^(-d|-F|-T|--form|--json|--upload-file|--post-data|--post-file)$/i.test(x) || /^--data/.test(x) || /^-d./.test(x))
     return { kind: sends ? 'send' : 'fetch', target, what }
   }
 

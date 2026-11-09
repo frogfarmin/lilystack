@@ -3,7 +3,7 @@
 Date: 2026-11-06. Status: done. Read this file before you add material from an
 upstream repository.
 
-<p align="center"><img src="../assets/harvest.svg" width="100%" alt="How the harvest worked. Four research agents read 25 top repositories at fixed commits. Text and rules came from ten MIT repositories and two Apache-2.0 repositories from Anthropic. Ideas only came from five more. Six were not taken, each for a stated reason. The steps: read the license, keep the core, remove the runtime. The result: 25 skills, 5 hooks, 1 lens agent, 32 evals."></p>
+<p align="center"><img src="../assets/harvest.svg" width="100%" alt="How the harvest worked. Four research agents read 25 top repositories at fixed commits. Text and rules came from twelve MIT sources and three Apache-2.0 sources. Ideas only came from five more. Six were not taken, each for a stated reason. The steps: read the license, keep the core, remove the runtime. The result: 32 skills, 5 hooks, 1 lens agent, 46 evals."></p>
 
 ## 1. Goal
 
@@ -57,7 +57,7 @@ in if all of these are true:
 | qa | Probes CLI, API, job and webhook behaviour. It reports first. It repairs only an approved batch | gstack qa and qa-only, merged |
 | test-audit | Finds tests that cost more than they protect, with evidence for each | gstack test-audit and its test-value rules |
 | feedback | Gives a verdict for each review comment before a code change | compound-engineering ce-resolve-pr-feedback |
-| context-audit | Grades CLAUDE.md and AGENTS.md files against the code. It cannot edit | claude-plugins-official claude-md-management |
+| context-audit | Grades CLAUDE.md and AGENTS.md files against the code. It applies only the diffs that the owner approves (section 9) | claude-plugins-official claude-md-management |
 | write-skill | Writes or edits a skill with the Lilystack diet, with test prompts and trigger queries | gstack write-skill; anthropics-skills skill-creator; claude-plugins-official plugin-dev and hookify; compound-engineering; the task-observer ideas in `lilystack.md` section 6.3 |
 | prose | Removes the signs of AI writing from prose. It keeps every fact. `--ste` gives Simplified Technical English | humanizer |
 
@@ -91,9 +91,9 @@ guard now starts careful, secrets, secure and freeze together.
 | Part | What it does |
 |---|---|
 | `evals/` | 32 trigger and near-miss cases for `claude plugin eval`, with graders that need no model. The first full run passed 32 of 32 |
-| `agents/lens.md` | A read-only lens subagent for review. Its tools are Read, Grep and Glob |
+| `agents/lens.md` | A read-only lens subagent for review, security-audit and the plan skills. Its tools are Read, Grep and Glob |
 | `output-styles/ste.md` | An opt-in output style for Simplified Technical English |
-| `disallowed-tools` | context-audit and retro cannot edit while they run |
+| `disallowed-tools` | retro cannot edit while it runs (context-audit lost this when it got its apply step, section 9) |
 | `.claude-plugin/marketplace.json` and `icon.png` | The fallback install works, and `claude plugin validate .` has no warning |
 
 ## 5. What Lilystack did not take
@@ -111,7 +111,7 @@ guard now starts careful, secrets, secure and freeze together.
 | The security-guidance reviews by a model, tdd-guard as shipped, caveman compress | They call a model. review keeps the rubric of security-guidance as text |
 | ralph-loop, the planning-with-files hooks, the fp-check Stop hooks | A loop that prompts Claude again, or a Stop gate |
 | hookify as a plugin, diet103 skill activation, session-report, receipts | A Python or Node runtime. write-skill keeps hookify's list of frustration signals |
-| wshobson/agents, ECC agents, compound-engineering orchestration | Persona agents or orchestration. Lilystack allows subagents only as lenses in review |
+| wshobson/agents, ECC agents, compound-engineering orchestration | Persona agents or orchestration. Lilystack sends only read-only subagents (the lens), from review, security-audit and the plan skills |
 | caveman, the output-style plugins of others | They set a voice. The owner's CLAUDE.md sets the voice. Lilystack's own `ste` style is opt-in, and it changes only the grammar |
 | webapp-testing, the hallmark build flow | Python and Node tools that duplicate the qa browser section and frontend-design. The rules are in; the tools are not |
 | gstack autoplan in unattended mode | It decides questions without the owner. Lilystack's autoplan (section 9) asks each User Challenge |
