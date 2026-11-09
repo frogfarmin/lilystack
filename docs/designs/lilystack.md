@@ -272,10 +272,16 @@ the old text gives no warning.
 changed in the working tree.
 
 **freeze** keeps the boundary in `~/.lilystack/freeze/<project-key>`. The key
-is a hash of the git toplevel (else the `cwd`). No boundary file means allow.
-It denies an edit outside the boundary. It asks when a Bash command writes
+is a hash of the git toplevel (else the `cwd`) when you set it. The hook finds
+the boundary from the nearest folder at or above the `cwd` that has one, else
+at or above the folder of the target (or of each path that a Bash command
+writes). So a change of `cwd` does not lose the boundary. No boundary file
+means allow, and with no freeze folder at all the hook stops at once. It
+denies an edit outside the boundary. It asks when a Bash command writes
 outside the boundary: redirects, `tee`, `sed -i`, `perl -i`, `cp`, `mv`,
-`install`, `ln`, `dd of=` and `find -exec`.
+`install`, `ln`, `dd of=`, `find -exec`, `touch`, `mkdir`, `rm`, `truncate`,
+`rsync`, `curl -o`, `wget -O`, `tar -x`/`-C`, `unzip -d`, and the same writes
+inside `bash -c "…"` and `eval`.
 
 - `/lilystack:unfreeze` removes the boundary file. The registered hook then
   does nothing.
