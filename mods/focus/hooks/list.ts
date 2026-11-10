@@ -9,6 +9,9 @@ export const MAX_AFTER = 6
 export const KEEP_DONE = 20
 export const NUDGE_MS = 45 * 60_000
 
+// True when the tasks after the main action are at MAX_AFTER: an op that adds one refuses.
+export const isFull = (list: FocusList): boolean => list.main !== null && list.after.length >= MAX_AFTER
+
 export const empty = (): FocusList => ({ main: null, mainSince: null, after: [], done: [], nudgedFor: null, seq: 0 })
 
 const clean = (text: string): string => String(text ?? '').replace(/\s+/g, ' ').trim()
@@ -57,7 +60,7 @@ export function checkAfter(list: FocusList, id: string, now: number): FocusList 
 
 export function reopen(list: FocusList, id: string, now: number): FocusList {
   const item = list.done.find((one) => one.id === id)
-  if (!item) return list
+  if (!item || isFull(list)) return list
   const back: Item = { id: item.id, text: item.text }
   const done = list.done.filter((one) => one.id !== id)
   if (list.main === null) return { ...list, main: back, mainSince: now, done, nudgedFor: null }
@@ -66,7 +69,7 @@ export function reopen(list: FocusList, id: string, now: number): FocusList {
 
 export function addAfter(list: FocusList, text: string, now: number): FocusList {
   const t = clean(text)
-  if (!t) return list
+  if (!t || isFull(list)) return list
   const m = mint(list, t)
   if (m.list.main === null) return { ...m.list, main: m.item, mainSince: now, nudgedFor: null }
   return { ...m.list, after: [...m.list.after, m.item] }
@@ -74,7 +77,7 @@ export function addAfter(list: FocusList, text: string, now: number): FocusList 
 
 export function setMain(list: FocusList, text: string, now: number): FocusList {
   const t = clean(text)
-  if (!t) return list
+  if (!t || isFull(list)) return list // the old main action needs a place in after
   const m = mint(list, t)
   const after = m.list.main ? [m.list.main, ...m.list.after] : m.list.after
   return { ...m.list, main: m.item, mainSince: now, after, nudgedFor: null }

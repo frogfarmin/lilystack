@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 344" width="960" height="344" role="img" aria-labelledby="t d">
 <title id="t">How Lilystack and Lilypad fit</title>
-<desc id="d">Lilypad holds the config: links.conf and the config files. bin/lily in Lilystack reads links.conf and makes symlinks on the two Macs. Claude Code on the Macs loads the Lilystack skills and hooks through CLAUDE_CODE_PLUGIN_DIRS; Mac 1 also loads the status mod. lily pull updates Lilystack first, then Lilypad, then runs lily check.</desc>
+<desc id="d">Lilypad holds the config: links.conf and the config files. bin/lily in Lilystack reads links.conf and makes symlinks on the two Macs. Claude Code on the Macs loads the Lilystack skills and hooks from its marketplace; Mac 1 also loads the status mod. lily pull updates Lilystack first, then Lilypad; then run lily check.</desc>
 <style>
   svg{--bg:#f6faf7;--bg2:#eef6f8;--card:#ffffff;--line:#d5e3db;--tx:#0f1f17;--mu:#55645c;--th:#3f51b5;--th-f:#eef0ff;--pl:#7c3aed;--pl-f:#f4efff;--ck:#0f766e;--ck-f:#e9f8f5;--sh:#b45309;--sh-f:#fff5e8;--sf:#be123c;--sf-f:#fff0f3;--an:#4d7c0f;--an-f:#f3f9e8;--ly:#047857;--ly-f:#e8f8f0;--pad1:#15803d;--pad2:#22a352;--pad3:#4cc574;--padv:#0e5e2c;--pet:#f9a8c9;--pet2:#fde4ee;--core:#f5c542;--rip:#9cc9b4;}
   @media (prefers-color-scheme: dark){svg{--bg:#0c1411;--bg2:#0b161b;--card:#131d19;--line:#25352e;--tx:#e7f2ec;--mu:#97a89f;--th:#9fa8ff;--th-f:#15172d;--pl:#c4a6ff;--pl-f:#1b1529;--ck:#5fd4c4;--ck-f:#0d2724;--sh:#f4b860;--sh-f:#231a0e;--sf:#ff8fa8;--sf-f:#261219;--an:#a3d65c;--an-f:#151d0e;--ly:#5ee0a8;--ly-f:#0c2119;--pad1:#1f9d50;--pad2:#2fb862;--pad3:#57d283;--padv:#0b4a23;--pet:#f58ab5;--pet2:#f9c6da;--core:#f5c542;--rip:#2c5244;}}
@@ -23,7 +23,7 @@
 <path d="M630,134 L724,134" fill="none" style="stroke:var(--mu)" stroke-width="2" stroke-linecap="round"/><path d="M716,128 L724,134 L716,140" fill="none" style="stroke:var(--mu)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text class="mu" x="677.0" y="126" font-size="11.5" text-anchor="middle">symlinks</text>
 <path d="M630,184 L724,184" fill="none" style="stroke:var(--mu)" stroke-width="2" stroke-linecap="round"/><path d="M716,178 L724,184 L716,190" fill="none" style="stroke:var(--mu)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><text class="mu" x="677.0" y="176" font-size="11.5" text-anchor="middle">loads</text>
 <text class="mu" x="724" y="244" font-size="12">Claude Code loads the plugin</text>
-<text class="mu" x="724" y="262" font-size="12">through CLAUDE_CODE_PLUGIN_DIRS.</text>
+<text class="mu" x="724" y="262" font-size="12">from its marketplace.</text>
 <text class="mu" x="724" y="290" font-size="12">lily pull: Lilystack first, then</text>
-<text class="mu" x="724" y="308" font-size="12">Lilypad, then lily check.</text>
+<text class="mu" x="724" y="308" font-size="12">Lilypad. Then run lily check.</text>
 </svg>

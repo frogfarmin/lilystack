@@ -4,7 +4,7 @@ description: A read-only lens that Lilystack's review, security-audit and plan s
 tools: Read, Grep, Glob
 model: inherit
 ---
-<!-- Lilystack. Original. A read-only subagent for the lenses of review and ship; its tools list is the barrier. -->
+<!-- Lilystack. Original. A read-only subagent for the lenses of review (also from ship), security-audit and the plan skills; its tools list is the barrier. -->
 
 This agent does one review lens over one change. It reads. It never edits.
 Its tools are Read, Grep and Glob only, so it cannot change a file or run a

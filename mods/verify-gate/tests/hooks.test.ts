@@ -12,7 +12,11 @@ const BAND = {
 } as const
 
 // A fake repo: `git status` reads `git.status`, the fingerprint reads `git.tree`.
-const setup = async ($, on, git: { status: string; tree: string }, tool: (e) => unknown, at = { root: ROOT }) => {
+// `git.broken` makes each process call throw. `calls` gets each process call.
+type Git = { status: string; tree: string; broken?: boolean }
+let calls: { argv: string[]; env?: Record<string, string> }[] = []
+const setup = async ($, on, git: Git, tool: (e) => unknown, at = { root: ROOT }) => {
+  calls = []
   mock.clock(on)
   on('session.start', () => ({ cwd: at.root }))
   on('session.root', () => ({ value: at.root }))
@@ -21,6 +25,8 @@ const setup = async ($, on, git: { status: string; tree: string }, tool: (e) => 
   on('fs.read', () => ({ value: CONF }))
   on('process.run', ($, e) => {
     const argv: string[] = e.argv
+    calls.push({ argv, env: e.init?.env })
+    if (git.broken) throw new Error('git is gone')
     const out = (stdout: string) => ({ value: { exitCode: 0, stdout, stderr: '' } })
     if (argv[0] === 'cp') return out('')
     if (argv[1] === 'status') return out(git.status)
@@ -109,6 +115,42 @@ test('with no git repo a merge is stopped, even after a check passes', async ($,
   const ran: string[] = []
   await setup($, on, { status: '', tree: '' }, (e) => { ran.push(e.command ?? e.tool); return { result: { stdout: 'ok' } } }, { root: SPARE })
   await $.tool.call({ tool: 'Bash', command: 'zsh tests/a.zsh' })
+  const merged = await $.tool.call({ tool: 'Bash', command: 'gh pr merge 7 --squash' })
+  expect(String(merged.deny ?? merged.text)).toContain('cannot read a git repo')
+  expect(ran).not.toContain('gh pr merge 7 --squash')
+})
+
+test('a git fault before a merge stops the merge: the facts are unknown', async ($, on) => {
+  const git: Git = { status: '## f...origin/f\n', tree: 't1' }
+  const ran: string[] = []
+  await setup($, on, git, (e) => { ran.push(e.command ?? e.tool); return { result: { stdout: 'ok' } } })
+  await $.tool.call({ tool: 'Bash', command: 'zsh tests/a.zsh && zsh tests/b.zsh' })
+  expect(await stampText($)).toContain('✅ APPROVED')
+  git.broken = true
+  const merged = await $.tool.call({ tool: 'Bash', command: 'gh pr merge 7 --squash' })
+  expect(String(merged.deny ?? merged.text)).toContain('merge stopped')
+  expect(ran).not.toContain('gh pr merge 7 --squash')
+})
+
+test('each fingerprint uses its own copy of the index and removes it', async ($, on) => {
+  const git = { status: '## f...origin/f\n', tree: 't1' }
+  await setup($, on, git, () => ({ result: { stdout: 'ok' } }))
+  calls = []
+  await $.tool.call({ tool: 'Bash', command: 'zsh tests/a.zsh' })
+  await $.tool.call({ tool: 'Bash', command: 'zsh tests/b.zsh' })
+  const copies = calls.filter((c) => c.argv[0] === 'cp').map((c) => c.argv[2])
+  const removed = calls.filter((c) => c.argv[0] === 'rm').map((c) => c.argv[c.argv.length - 1])
+  expect(copies.length).toBe(2)
+  expect(copies[0]).not.toBe(copies[1])
+  expect(copies.every((p) => p.startsWith(ROOT + '/.git/'))).toBe(true)
+  expect(removed).toEqual(copies)
+  const adds = calls.filter((c) => c.argv[1] === 'add').map((c) => c.env?.GIT_INDEX_FILE)
+  expect(adds).toEqual(copies)
+})
+
+test('a folder with no slash (C:\\proj) ends the search for .git', async ($, on) => {
+  const ran: string[] = []
+  await setup($, on, { status: '', tree: '' }, (e) => { ran.push(e.command ?? e.tool); return { result: { stdout: 'ok' } } }, { root: 'C:\\proj' })
   const merged = await $.tool.call({ tool: 'Bash', command: 'gh pr merge 7 --squash' })
   expect(String(merged.deny ?? merged.text)).toContain('cannot read a git repo')
   expect(ran).not.toContain('gh pr merge 7 --squash')

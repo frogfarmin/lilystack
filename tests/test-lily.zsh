@@ -240,6 +240,19 @@ lint_fixture; print x > $LILYPAD_ROOT/shell/stray; out=$($LILY sweep --dry-run s
 assert "sweep: dry-run moves nothing"              '[[ -f $LILYPAD_ROOT/shell/stray && ! -e $LILYPAD_SWEEP && $out == "would sweep shell/stray"* ]]'
 lint_fixture; $LILY sweep >/dev/null 2>&1; rc=$?
 assert "sweep: no path exits 2"                    '(( rc == 2 ))'
+# other spellings of a mapped source are refused too
+for p in ./shell/zshrc shell//zshrc shell/./zshrc ./shell shell/. .//shell/ @R@//shell/zshrc @R@/./shell; do
+  lint_fixture; p=${p/@R@/$LILYPAD_ROOT}; out=$($LILY sweep $p 2>&1); rc=$?
+  assert "sweep: mapped source spelled $p refused" '(( rc == 1 )) && [[ $out == *"links.conf maps"* && -f $LILYPAD_ROOT/shell/zshrc && ! -e $LILYPAD_SWEEP ]]'
+done
+lint_fixture; print x > $LILYPAD_ROOT/shell/stray; out=$($LILY sweep ./shell//stray 2>&1); rc=$?
+assert "sweep: an odd spelling of a free path is swept under its plain name" '(( rc == 0 )) && [[ -f $(swept shell/stray) ]]'
+# a folder symlink that leads out of the root is refused, and the file behind it stays
+lint_fixture; mkdir -p $tmp/outside; print x > $tmp/outside/f; ln -s $tmp/outside $LILYPAD_ROOT/ext
+out=$($LILY sweep ext/f 2>&1); rc=$?
+assert "sweep: path through a symlink out of the root refused" '(( rc == 1 )) && [[ $out == *"refuse ext/f"* && -f $tmp/outside/f && ! -e $LILYPAD_SWEEP ]]'
+out=$($LILY sweep ext 2>&1); rc=$?
+assert "sweep: the symlink itself may go"          '(( rc == 0 )) && [[ -L $(swept ext) && -f $tmp/outside/f ]]'
 
 # --- pull: fast-forward Lilystack then Lilypad; throwaway repos with a bare origin, no network ---
 # make_repo <name>: bare origin $tmp/origin-<name>.git, a working clone at $tmp/<name>, one commit pushed

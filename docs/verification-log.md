@@ -108,7 +108,6 @@ Headless, Sonnet, `--permission-mode dontAsk` with read-only allow rules.
 | context-audit | On a copy of Lilystack it graded `AGENTS.md` 90 of 100, with evidence for each criterion. It printed two proposals as diffs and changed nothing. |
 | prose `--ste` | It removed the filler and the sales words and kept both facts (more than 40 companies, March 2024). It wrote "we launched it", but the source did not say "we". |
 | spec | It read the code first, found that `sub` already existed, and wrote no spec. It asked one question, with "Why it matters", a recommended option and four options. |
-
 | qa | On a small CLI whose code broke its README (usage on stdout, exit 0), it found the conflict by reading. It wrote a QA plan with five charters, marked the contracts that do not apply, and asked one time before it ran a command. |
 | test-audit | On five tests, it found the three weak ones (no assertion, a duplicate, a source grep), each with a complete retirement card, and kept the two real tests. It changed nothing. |
 | feedback | On four pasted comments, it chose to fix two, did not do a rename with evidence (the repo has no `bound`), and declined a None check with a reason. It wrote reply drafts and changed nothing before a choice. |

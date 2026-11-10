@@ -44,8 +44,9 @@ async function findRoot($, cwd: string): Promise<string | null> {
   let dir = cwd.replace(/\/+$/, '') || '/'
   for (;;) {
     if (await $.fs.exists(dir + '/.git')) return dir
-    if (dir === '/') return null
-    dir = dirname(dir)
+    const up = dirname(dir)
+    if (up === dir) return null // the top, also for a path such as C:\\proj
+    dir = up
   }
 }
 

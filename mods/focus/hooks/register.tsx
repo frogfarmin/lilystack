@@ -5,8 +5,10 @@ import type { EngineInterface, Register, RenderChildren } from 'claude-code'
 import type { FocusList, Item } from '../types'
 import {
   addAfter, checkAfter, checkByText, checkMain, clear, empty, fromStore, nudgeDue,
-  progress, promptText, reopen, setList, setMain, statusText, MAX_AFTER,
+  isFull, progress, promptText, reopen, setList, setMain, statusText, MAX_AFTER,
 } from './list.ts'
+
+const FULL = 'The list is full: six tasks after the main action. Check one off first.'
 
 const PANE = 'focus'
 const TITLE = 'Focus'
@@ -29,8 +31,9 @@ async function findRoot($: EngineInterface, cwd: string): Promise<string> {
   let dir = start
   for (;;) {
     if (await $.fs.exists(dir + '/.git')) return dir
-    if (dir === '/') return start
-    dir = dirname(dir)
+    const up = dirname(dir)
+    if (up === dir) return start // the top, also for a path such as C:\\proj
+    dir = up
   }
 }
 
@@ -57,13 +60,16 @@ async function follow($: EngineInterface): Promise<void> {
   }
 }
 
-// Apply one op to the list: the state, the store and the status line.
+// Apply one op to the list: the state, the store and the status line. The op runs
+// inside update, on the value it writes over, so two changes at once both land.
 async function change($: EngineInterface, op: (list: FocusList, now: number) => FocusList): Promise<{ before: FocusList; after: FocusList }> {
   await follow($)
   const now = await $.clock.now()
-  const before = await read($, listAtom)
-  const after = op(before, now)
-  await update($, listAtom, () => after)
+  let before = empty()
+  const after = await update($, listAtom, (list) => {
+    before = list
+    return op(list, now)
+  })
   try {
     await $.store.set(storeKey, after)
   } catch (err) {
@@ -89,7 +95,8 @@ async function doCheckAfter($: EngineInterface, id: string): Promise<void> {
 }
 
 async function doReopen($: EngineInterface, id: string): Promise<void> {
-  await change($, (list, now) => reopen(list, id, now))
+  const { after } = await change($, (list, now) => reopen(list, id, now))
+  if (after.done.some((one) => one.id === id)) $.ui.toast(FULL)
 }
 
 const openPane = ($: EngineInterface) => $.ui.open({ id: PANE, title: TITLE })
@@ -212,14 +219,16 @@ export const register: Register = (on) => {
       await openPane($)
       return { text: 'Focus pane opened.' }
     }
-    const { after } = await change($, (l, now) => setMain(l, text, now))
+    const { before, after } = await change($, (l, now) => setMain(l, text, now))
+    if (after.seq === before.seq && isFull(before)) return { text: FULL }
     return { text: `🎯 Main action: ${after.main?.text}` }
   }).catch(() => ({ text: 'focus: the command failed.' }))
 
   on('command.run', { command: 'then' }, async ($, e) => {
     const text = e.args.trim()
     if (!text) return { text: 'Type a task after /then.' }
-    const { after } = await change($, (l, now) => addAfter(l, text, now))
+    const { before, after } = await change($, (l, now) => addAfter(l, text, now))
+    if (after.seq === before.seq && isFull(before)) return { text: FULL }
     return { text: after.main?.text === text ? `🎯 Main action: ${text}` : `Added after: ${text}` }
   }).catch(() => ({ text: 'focus: the command failed.' }))
 
@@ -269,7 +278,7 @@ export const register: Register = (on) => {
       list.after.forEach((item, i) => {
         if (used >= room) return
         rows.push(
-          <Button key={'after-' + item.id} hotkey={String(i + 1)} plain onPress={() => doCheckAfter($, item.id)}>
+          <Button key={'after-' + item.id} hotkey={i < 9 ? String(i + 1) : undefined} plain onPress={() => doCheckAfter($, item.id)}>
             {'☐ ' + item.text}
           </Button>,
         )

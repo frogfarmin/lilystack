@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/assets/hero.svg" width="100%" alt="Lilystack: short rewrites of the best Claude Code skills. 32 skills, 5 safety hooks, 46 of 46 evals pass, 0 telemetry. From 18 upstreams, about 2.1k tokens in each session."></p>
+<p align="center"><img src="docs/assets/hero.svg" width="100%" alt="Lilystack: short rewrites of the best Claude Code skills. 32 skills, 5 safety hooks, 46 of 46 evals pass, 0 telemetry. From 15 upstreams, about 2.1k tokens in each session."></p>
 
 **Lilystack is a Claude Code plugin. It has short rewrites of the best skills from the top Claude repositories on GitHub.**
 
@@ -13,7 +13,7 @@
 
 ## What is inside
 
-<p align="center"><img src="docs/assets/map.svg" width="100%" alt="Map of Lilystack. The sprint: 1 Think (office-hours, spec), 2 Plan (plan-ceo-review, plan-eng-review), 3 Check (review, verify, qa, test-audit), 4 Ship (ship, feedback). Safety hooks: careful, secrets, secure, test-first, freeze, unfreeze, guard. Anytime: investigate, retro, context-audit, write-skill, prose. Lily tools: bin/lily, lily-check, lily-lint, lily-sweep, and the status mod. Also inside: the lens agent, the ste output style and the evals."></p>
+<p align="center"><img src="docs/assets/map.svg" width="100%" alt="Map of Lilystack. The sprint: 1 Think (office-hours, spec), 2 Plan (plan-ceo-review, plan-eng-review, plan-design-review, plan-devex-review, autoplan), 3 Check (review, verify, qa, test-audit), 4 Ship (ship, feedback). Safety hooks: careful, secrets, secure, test-first, freeze, unfreeze, guard. Anytime: investigate, retro, context-audit, write-skill, prose, frontend-design, security-audit, compound, second-opinion. Lily tools: bin/lily, lily-check, lily-lint, lily-sweep, and the mods status, verify-gate, outbound-ledger and focus. Also inside: the lens agent, the ste output style and the evals."></p>
 
 Each call starts with `/lilystack:`. For example, type `/lilystack:spec`. An argument in `[ ]` is optional. If a skill needs an argument that you did not give, it asks for it.
 
@@ -101,7 +101,7 @@ These are the author's own tools. They are all 🌱 **Original**. The `lily` too
 | Part&nbsp;of&nbsp;the&nbsp;plugin | What it does |
 |---|---|
 | [`marketplace`](.claude-plugin/marketplace.json) | A one-plugin marketplace, so that you can install Lilystack with `claude plugin install`, from the folder or from GitHub. |
-| [`lens`](agents/lens.md) | 🌱 **Original.** An agent: a read-only subagent for one review lens. review sends it, also when ship runs review. Its tools are Read, Grep and Glob, so it cannot edit or run a command. |
+| [`lens`](agents/lens.md) | 🌱 **Original.** An agent: a read-only subagent for one review lens. review, security-audit, plan-design-review and autoplan send it (review also when ship runs it). Its tools are Read, Grep and Glob, so it cannot edit or run a command. |
 | [`ste`](output-styles/ste.md) | 🌱 **Original.** An output style: Claude writes each reply in ASD-STE100 Simplified Technical English. It is off until you choose it with `/output-style lilystack:ste`. |
 | [`evals`](evals) | 🌱 **Original.** An eval suite: 46 cases for `claude plugin eval`. Each skill must start on its own request, and must not start on a near-miss. A quality case examines the output of prose. See [Evals](#evals). |
 
@@ -138,18 +138,18 @@ You need Claude Code, `jq` (the hooks use it) and `zsh` (only for the checks and
 
 ## Evals
 
-`claude plugin eval` gives two requests to each of the 22 skills that Claude can start. One request is for the skill. The other request only uses the same words. A case passes when the skill starts on the first request and does not start on the second.
+`claude plugin eval` gives two requests to each of the 22 skills that Claude can start (qa has one more, for a web page: 45 trigger and near-miss cases). One request is for the skill. The other request only uses the same words. A case passes when the skill starts on the first request and does not start on the second.
 
 ```sh
 claude plugin eval . --tag trigger --ablation none --no-publish
 ```
 
-The last full run (`--runs 1`) passed 46 of 46 cases for about $2.60, on 2026-11-06. The trigger graders need no model. The quality case also asks a judge model. `--no-publish` keeps the report on your machine. Each run starts real Claude sessions, so it costs money. It is not one of the five checks. See [`evals/README.md`](evals/README.md).
+The last full run (`--runs 1`, on 2026-11-06) passed 45 of 46 cases for $2.46. A rerun of the quality case after a repair passed for $0.15, so all 46 cases pass. The trigger graders need no model. The quality case also asks a judge model; run it with `--tag quality`. `--no-publish` keeps the report on your machine. Each run starts real Claude sessions, so it costs money. It is not one of the five checks. See [`evals/README.md`](evals/README.md).
 
 ## Checks
 
 ```sh
-zsh tests/lint-skills.zsh      # every SKILL.md, eval grader and agent against the rules; prints clean
+zsh tests/lint-skills.zsh      # every SKILL.md and agent against the rules; prints clean
 zsh tests/test-lint.zsh        # the tests of the lint
 zsh tests/test-hooks.zsh       # the hooks
 zsh tests/test-lily.zsh        # bin/lily, in a temporary HOME and Lilypad root
@@ -160,7 +160,7 @@ After a change to a mod in `mods/`, also run `claude plugin validate .` and `cla
 
 ## Where the skills come from
 
-<p align="center"><img src="docs/assets/harvest.svg" width="100%" alt="How the harvest worked. Four research agents read 25 top repositories at fixed commits. Text and rules came from ten MIT repositories and two Apache-2.0 repositories from Anthropic. Ideas only came from five more. Six were not taken, each for a stated reason. The steps: read the license, keep the core, remove the runtime. The result: 25 skills, 5 hooks, 1 lens agent, 32 evals."></p>
+<p align="center"><img src="docs/assets/harvest.svg" width="100%" alt="How the harvest worked. Four research agents read 25 top repositories at fixed commits. Text and rules came from twelve MIT sources and three Apache-2.0 sources. Ideas only came from five more. Six were not taken, each for a stated reason. The steps: read the license, keep the core, remove the runtime. The result: 32 skills, 5 hooks, 1 lens agent, 46 evals."></p>
 
 Each skill is a short rewrite. It keeps the questions, the checklists, the rules and the output formats of its source, and removes the runtime. [`docs/designs/harvest.md`](docs/designs/harvest.md) tells how the harvest found the sources, and why it did not take other repositories. [`NOTICE.md`](NOTICE.md) has the notices and one row for each skill.
 
@@ -198,7 +198,7 @@ Each skill is a short rewrite. It keeps the questions, the checklists, the rules
 
 These are the author's own tools (🌱 **Original**). The author keeps config and ideas in a second repo, [Lilypad](https://github.com/frogfarmin/Lilypad), and uses Lilystack on two Macs, in the Claude desktop app. The desktop app loads Lilystack from its marketplace, which Lilypad's `Claude/settings.json` names.
 
-<p align="center"><img src="docs/assets/repos.svg" width="100%" alt="How Lilystack and Lilypad fit in the author's setup. Lilypad holds the config: links.conf and the config files. bin/lily in Lilystack reads links.conf and makes symlinks on the two Macs. Claude Code on the Macs loads the Lilystack skills and hooks through CLAUDE_CODE_PLUGIN_DIRS. The main Mac also loads the status mod. lily pull updates Lilystack first, then Lilypad, then runs lily check."></p>
+<p align="center"><img src="docs/assets/repos.svg" width="100%" alt="How Lilystack and Lilypad fit in the author's setup. Lilypad holds the config: links.conf and the config files. bin/lily in Lilystack reads links.conf and makes symlinks on the two Macs. Claude Code on the Macs loads the Lilystack skills and hooks from its marketplace. The main Mac also loads the status mod. lily pull updates Lilystack first, then Lilypad; then run lily check."></p>
 
 - **`bin/lily`** (zsh) links Lilypad's config into the home folder from Lilypad's `links.conf`. Its root is `$HOME/Lilypad`; `LILYPAD_ROOT` changes it. The commands are `link`, `check`, `adopt`, `lint`, `sweep` and `pull`. `pull` runs `git pull --ff-only` in Lilystack, then in Lilypad, and reports each result. Lilypad's `bin/lily` is a shim that runs this file.
 - **Upgrade order on each Mac:** pull Lilystack first, then Lilypad, then run `~/Lilypad/bin/lily check`. `~/Lilypad/bin/lily pull` does the two pulls in that order, fast-forward only.

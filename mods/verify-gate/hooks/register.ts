@@ -1,7 +1,7 @@
 // The verify-gate mod: an APPROVED stamp above the prompt when the checks pass on the
 // committed and pushed tree, and a stop on PR merges until then.
 // Every mods API call lives in this file; gate.ts is pure.
-import { bandRows, checksIn, denyText, emptyState, isMergeCommand, noRepoText, parseConf, parseGitStatus, report, verdict } from './gate.ts'
+import { bandRows, checksIn, denyText, emptyState, isMergeCommand, noRepoText, parseConf, parseGitStatus, recordRun, report, verdict } from './gate.ts'
 import type { GateState, GitFacts } from './gate.ts'
 import type { EngineInterface, Register } from 'claude-code'
 
@@ -26,8 +26,9 @@ async function findRoot($: $, from: string): Promise<string | null> {
   let dir = from.replace(/\/+$/, '') || '/'
   for (;;) {
     if (await $.fs.exists(dir + '/.git')) return dir
-    if (dir === '/') return null
-    dir = dirname(dir)
+    const up = dirname(dir)
+    if (up === dir) return null // the top, also for a path such as C:\\proj
+    dir = up
   }
 }
 
@@ -39,15 +40,20 @@ async function git($: $, args: string[], env?: Record<string, string>): Promise<
 // The tree of the working copy as `git add -A && git commit` would make it, without a
 // change to the real index: a copy of the index in .git takes the adds. Equal before and
 // after the commit, so a check that passed before the commit still holds after it.
+// Each call has its own copy, so two calls at once do not share one, and removes it after.
 async function fingerprint($: $): Promise<string | null> {
   const gitDir = (await git($, ['rev-parse', '--absolute-git-dir']))?.trim()
   if (!gitDir) return null
-  const tmp = gitDir + '/verify-gate.index'
+  const tmp = `${gitDir}/verify-gate-${crypto.randomUUID()}.index`
   const env = { GIT_INDEX_FILE: tmp }
-  const copied = (await $.fs.exists(gitDir + '/index')) && (await $.process.run(['cp', gitDir + '/index', tmp], { cwd: root ?? cwd })).exitCode === 0
-  if (!copied && (await git($, ['read-tree', '--empty'], env)) === null) return null
-  if ((await git($, ['add', '-A'], env)) === null) return null
-  return (await git($, ['write-tree'], env))?.trim() || null
+  try {
+    const copied = (await $.fs.exists(gitDir + '/index')) && (await $.process.run(['cp', gitDir + '/index', tmp], { cwd: root ?? cwd })).exitCode === 0
+    if (!copied && (await git($, ['read-tree', '--empty'], env)) === null) return null
+    if ((await git($, ['add', '-A'], env)) === null) return null
+    return (await git($, ['write-tree'], env))?.trim() || null
+  } finally {
+    await $.process.run(['rm', '-f', tmp], { cwd: root ?? cwd }).catch(() => undefined)
+  }
 }
 
 async function refreshGit($: $): Promise<void> {
@@ -59,6 +65,7 @@ async function refreshGit($: $): Promise<void> {
     state.git = facts
     error = null
   } catch (err) {
+    state.git = null // unknown facts: a merge is stopped
     error = 'git: ' + message(err)
   }
 }
@@ -147,10 +154,7 @@ export const register: Register = (on) => {
       const ok = r.deny === undefined && r.isError !== true
       if (r.deny === undefined) {
         await refreshGit($)
-        const at = await $.clock.now()
-        for (const check of counted) state.runs[check] = { command: check, ok, at, fp: state.git?.fp ?? null }
-        state.lastFailed = ok ? null : counted[0]
-        if (ok) state.edited = []
+        state = recordRun(state, counted, ok, await $.clock.now(), state.git?.fp ?? null)
         checksThisTurn++
       }
     } catch (err) {

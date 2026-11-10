@@ -87,3 +87,50 @@ test('MCP names: a read word wins, a write word sends, parts of words do not cou
     expect(isWriteName(name)).toBe(true)
   expect(isWriteName('mock_call')).toBe(false)
 })
+
+test('redact masks URL userinfo, -u user:pass, secret headers, _key= params and JSON secrets', async () => {
+  expect(redact('git clone https://me:hunter2@git.example.com/a')).toBe('git clone https://***@git.example.com/a')
+  expect(redact('curl -u me:hunter2 https://x')).toBe('curl -u *** https://x')
+  expect(redact("curl --user 'me:hunter2' https://x")).toBe('curl --user *** https://x')
+  expect(redact('curl --user=me:hunter2 https://x')).toBe('curl --user=*** https://x')
+  expect(redact('git push -u origin main')).toBe('git push -u origin main')
+  expect(redact('curl -H "X-Api-Key: abc123" https://x')).toBe('curl -H "X-Api-Key: ***" https://x')
+  expect(redact("curl -H 'X-Auth-Token: abc123' -H 'X-Client-Secret:zz' https://x")).toBe("curl -H 'X-Auth-Token: ***' -H 'X-Client-Secret:***' https://x")
+  expect(redact('curl -H "authorization: Basic dXNlcjpwYXNz" https://x')).toBe('curl -H "authorization: ***" https://x')
+  expect(redact('curl -d client_secret=abc -d private_key=def https://x')).toBe('curl -d client_secret=*** -d private_key=*** https://x')
+  expect(redact('X_API_KEY=abc curl https://x')).toBe('X_API_KEY=*** curl https://x')
+  expect(redact('monkey=banana')).toBe('monkey=banana')
+  expect(redact(`curl -d '{"password": "hunter2", "api_key":"k1", "token" : "t1", "client_secret": "s1", "name": "a"}' https://x`)).toBe(
+    `curl -d '{"password": "***", "api_key":"***", "token" : "***", "client_secret": "***", "name": "a"}' https://x`,
+  )
+})
+
+test('the target of a URL with user:pass is the host, and the userinfo is masked', async () => {
+  expect(bash('curl https://me:hunter2@api.example.com/v1')).toEqual({ kind: 'fetch', target: 'api.example.com', what: 'curl https://***@api.example.com/v1' })
+  expect(bash('git clone https://me:tok@git.example.com/a/b')?.target).toBe('git.example.com')
+  expect(classify('WebFetch', { url: 'https://u:p@docs.example.com/a' })).toEqual({ kind: 'fetch', target: 'docs.example.com', what: 'https://***@docs.example.com/a' })
+})
+
+test('curl sends with -XPOST, --request=POST, --json, -d and --data*', async () => {
+  for (const c of [
+    'curl -XPOST https://a.example.com',
+    'curl -Xput https://a.example.com',
+    'curl --request=POST https://a.example.com',
+    'curl --request PATCH https://a.example.com',
+    `curl --json '{"a":1}' https://a.example.com`,
+    'curl -d x=1 https://a.example.com',
+    'curl -dx=1 https://a.example.com',
+    'curl --data-urlencode x=1 https://a.example.com',
+    'curl --data=x https://a.example.com',
+  ]) expect([c, bash(c)?.kind]).toEqual([c, 'send'])
+  expect(bash('curl -XGET https://a.example.com')?.kind).toBe('fetch')
+  expect(bash('curl --request=GET https://a.example.com')?.kind).toBe('fetch')
+})
+
+test('timeout N, nohup and time in front of a command are skipped', async () => {
+  expect(bash('timeout 30 git push origin main')?.target).toBe('git remote origin')
+  expect(bash('timeout -s KILL 5m curl -X POST https://a.example.com')?.kind).toBe('send')
+  expect(bash('nohup curl https://a.example.com')?.target).toBe('a.example.com')
+  expect(bash('time npm publish')?.target).toBe('npm registry')
+  expect(bash('sudo env FOO=1 nohup timeout 10 gh pr merge 3')?.kind).toBe('send')
+})

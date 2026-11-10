@@ -6,33 +6,40 @@
 # script, it answers with additionalContext naming each rule and its fix, and no permission decision,
 # so the normal permission flow runs. A rule that also matches the old text (Edit and MultiEdit
 # old_string; for Write and NotebookEdit, the file already on disk) is skipped. No match or another
-# tool: no output, exit 0. jq missing, payload unreadable or rules missing: one stderr line, exit 2
-# (the edit is blocked; the hook fails closed). Nothing is logged or stored.
+# tool: no output, exit 0. jq missing, payload unreadable or of the wrong shape, or rules missing: one
+# stderr line, exit 2 (the edit is blocked; the hook fails closed). Nothing is logged or stored.
 set -u
 die() { printf 'lilystack secure: %s\n' "$1" >&2; exit 2; }
 command -v jq >/dev/null 2>&1 || die "jq is missing (brew install jq); blocking edits until it is installed"
 payload=$(cat)
-printf '%s' "$payload" | jq -e . >/dev/null 2>&1 || die "could not read the hook payload; blocking the edit"
+# the shape: an object; tool_input an object; each field read below a string
+printf '%s' "$payload" | jq -e 'type == "object" and ((.tool_input // {}) | type) == "object"
+  and all(.tool_name, .cwd, (.tool_input | .file_path, .notebook_path, .new_string, .old_string, .edit_mode,
+          .content, .new_source); . == null or type == "string")
+  and ((.tool_input.edits // []) | type == "array" and all(.[]; type == "object"
+       and all(.new_string, .old_string; . == null or type == "string")))' \
+  >/dev/null 2>&1 || die "could not read the hook payload, or it has the wrong shape; blocking the edit"
 here=$(cd "$(dirname "$0")" && pwd)
 rules="$here/secure-patterns.txt"
 [ -r "$rules" ] || die "secure-patterns.txt is missing beside secure.sh; blocking the edit"
 [ -r "$here/lib-path.sh" ] || die "lib-path.sh is missing beside secure.sh; blocking the edit"
 . "$here/lib-path.sh"   # absolute
 
-j() { printf '%s' "$payload" | jq -r "$1"; }
-tool=$(j '.tool_name // empty')
+j() { printf '%s' "$payload" | jq -r "$1"; }   # call as x=$(j ...) || die "$bad"
+bad="could not read the hook payload; blocking the edit"
+tool=$(j '.tool_name // empty') || die "$bad"
 case "$tool" in Edit|Write|MultiEdit|NotebookEdit) ;; *) exit 0 ;; esac
-path=$(j '.tool_input.file_path // .tool_input.notebook_path // empty')
-cwd=$(j '.cwd // empty'); [ -n "$cwd" ] || cwd=$PWD
+path=$(j '.tool_input.file_path // .tool_input.notebook_path // empty') || die "$bad"
+cwd=$(j '.cwd // empty') || die "$bad"; [ -n "$cwd" ] || cwd=$PWD
 old=""
 case "$tool" in
-  Edit) new=$(j '.tool_input.new_string // empty'); old=$(j '.tool_input.old_string // empty') ;;
+  Edit) new=$(j '.tool_input.new_string // empty') || die "$bad"; old=$(j '.tool_input.old_string // empty') || die "$bad" ;;
   MultiEdit)
-    new=$(j '[.tool_input.edits[]? | .new_string // empty] | join("\n")')
-    old=$(j '[.tool_input.edits[]? | .old_string // empty] | join("\n")') ;;
+    new=$(j '[.tool_input.edits[]? | .new_string // empty] | join("\n")') || die "$bad"
+    old=$(j '[.tool_input.edits[]? | .old_string // empty] | join("\n")') || die "$bad" ;;
   *)
-    [ "$(j '.tool_input.edit_mode // empty')" = delete ] && exit 0
-    new=$(j '.tool_input.content // .tool_input.new_source // empty')
+    mode=$(j '.tool_input.edit_mode // empty') || die "$bad"; [ "$mode" = delete ] && exit 0
+    new=$(j '.tool_input.content // .tool_input.new_source // empty') || die "$bad"
     f=$(absolute "$path" "$cwd")
     if [ -n "$path" ] && [ -f "$f" ] && [ -r "$f" ]; then old=$(cat -- "$f" 2>/dev/null); fi ;;
 esac

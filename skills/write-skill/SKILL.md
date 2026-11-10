@@ -119,7 +119,7 @@ real bad command and passed one real good one.
 
 - **A cap that only falls.** The cap is the after-value of the skill's last
   `Skill-Size:` line in `git log`, else its current length. Trimming lowers
-  it; raising it needs a written reason. The lint's 400 stays the hard stop.
+  it; raising it needs a written reason. The lint's 500 stays the hard stop.
 - **A coverage table for moves.** For a merge, or a split with wording
   changed, list each source heading against where it landed (moved, merged,
   left behind, dropped with a reason). Check a verbatim split line by line.
@@ -129,7 +129,7 @@ real bad command and passed one real good one.
 `zsh tests/lint-skills.zsh` must print `clean`; add `zsh tests/test-lint.zsh`
 if the lint changed. Check the rest by hand against `AGENTS.md`: a one-line
 description; `argument-hint` where arguments exist;
-`disable-model-invocation: true` for ship, careful, freeze, guard, unfreeze;
+`disable-model-invocation: true` for the skills that `AGENTS.md` lists;
 the provenance comment (Apache-2.0 adds "; changed") and its `NOTICE.md` row;
 under 300 lines; questions one at a time; commits ask; every referenced file
 exists; no fact in two files.

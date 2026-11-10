@@ -248,30 +248,49 @@ cmd_lint() {
 # is_source <rel>: rel (relative to the root) is exactly a links.conf source.
 is_source() { local s; for s in $SRCS; do [[ ${s#$LILYPAD_ROOT/} == $1 ]] && return 0; done; return 1 }
 
+# normrel <path>: the same path with // and /./ collapsed, and a leading ./ and a trailing / or /.
+# dropped, so that ./shell//zshrc compares equal to shell/zshrc
+normrel() {
+  local p=$1
+  while [[ $p == *//* ]]; do p=${p//\/\//\/}; done
+  while [[ $p == */./* ]]; do p=${p//\/.\//\/}; done
+  while [[ $p == ./?* ]]; do p=${p#./}; done
+  while [[ $p == ?*/. ]]; do p=${p%/.}; done
+  while [[ $p == ?*/ ]]; do p=${p%/}; done
+  print -r -- $p
+}
+
 # sweep: move repo paths (relative to the Lilypad root, or absolute inside it) to
 # $LILYPAD_SWEEP/lilypad-sweep-<YYYYmmdd>/<path> and stage the removal of tracked ones.
 # Every path is checked first; one refusal moves nothing. Refused: paths outside the root,
-# .git, missing paths, a links.conf source or a folder holding one (its link would break),
-# and a destination that already exists. A file inside a mapped folder may go; if that leaves
-# the mapped folder empty it gets a .gitkeep so the folder and its link survive a fresh clone.
-# Any other folder left empty is removed.
+# a path whose folder resolves outside it (through a symlink), .git, missing paths, a
+# links.conf source or a folder holding one (its link would break), and a destination that
+# already exists. Paths are compared after normrel. A file inside a mapped folder may go; if
+# that leaves the mapped folder empty it gets a .gitkeep so the folder and its link survive a
+# fresh clone. Any other folder left empty is removed.
 cmd_sweep() {
-  local root=$LILYPAD_ROOT rel s dest dir bad=0 tracked
+  local root=$LILYPAD_ROOT rel s dest dir bad=0 tracked par
   local stamp=lilypad-sweep-$(date +%Y%m%d)
-  local -a rels
+  local -a rels srcs
   (( $# )) || usage
   git -C $root rev-parse --git-dir >/dev/null 2>&1 || die "sweep needs $root to be a git repository"
+  root=$(normrel $root)
+  for s in $SRCS; do srcs+=("$(normrel ${s#$root/})"); done
   for rel in "$@"; do
-    [[ $rel == $root/* ]] && rel=${rel#$root/}
-    rel=${rel%/}
+    rel=$(normrel $rel)
+    if [[ $rel == $root/* ]]; then rel=${rel#$root/}
+    elif [[ $rel == ${root:A}/* ]]; then rel=${rel#${root:A}/}; fi
     if [[ -z $rel || $rel == (/*|.|..|../*|*/..|*/../*|.git|.git/*) ]]; then
       print -u2 -- "refuse $rel: not a path inside $root"; bad=1; continue
+    fi
+    par=${${:-$root/$rel}:h:A}
+    if [[ $par != ${root:A} && $par != ${root:A}/* ]]; then
+      print -u2 -- "refuse $rel: its folder resolves to $par, outside $root"; bad=1; continue
     fi
     if [[ ! -e $root/$rel && ! -L $root/$rel ]]; then
       print -u2 -- "refuse $rel: does not exist"; bad=1; continue
     fi
-    for s in $SRCS; do
-      s=${s#$root/}
+    for s in $srcs; do
       if [[ $rel == $s || $s == $rel/* ]]; then
         print -u2 -- "refuse $rel: links.conf maps $s; remove that row first"; bad=1; continue 2
       fi
