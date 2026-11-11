@@ -3,13 +3,31 @@ name: feedback
 description: Judge every review comment on a PR with evidence before touching code, then fix, reply or escalate only as the owner approves; use when review comments from people or bots come back on a PR
 argument-hint: "[PR number or pasted comments]"
 ---
-<!-- Lilystack. Rewritten from compound-engineering-plugin skills/ce-resolve-pr-feedback/references/evaluation-rubric.md, skills/ce-resolve-pr-feedback/SKILL.md and references/full-mode.md at 173bd33 (MIT, Copyright (c) 2025 Every). -->
+<!-- Lilystack. Rewritten from compound-engineering-plugin skills/ce-resolve-pr-feedback/references/evaluation-rubric.md, skills/ce-resolve-pr-feedback/SKILL.md and references/full-mode.md at 173bd33 (MIT, Copyright (c) 2025 Every); and superpowers skills/receiving-code-review/SKILL.md at 22f0b46 (MIT, Copyright (c) 2025 Jesse Vincent). -->
 
 # feedback: a verdict for every comment, then the owner decides
 
-The stance is superpowers' receiving-code-review: follow it. This skill adds
-the verdicts, the reasoning across threads and the asks. A verdict comes before
-any code change; every code change, reply, resolve, commit and push asks first.
+A verdict comes before any code change; every code change, reply, resolve,
+commit and push asks first.
+
+## Stance
+
+Review is a technical evaluation, not a social one.
+
+- **Restate** each ask in your own words, as the change it requires. An ask
+  you cannot restate is unclear.
+- **Clarify every unclear item before you implement any.** Items can depend
+  on each other, so one unclear item holds the whole batch: ask about it
+  before the first fix, not after the clear ones are in.
+- **Verify against the code.** A comment is a claim about this codebase.
+  Check there that it holds, what its fix would break and why the code is
+  the way it is. If you cannot check it, say what you would need.
+- **Grep for real usage before you build something "properly".** When a
+  reviewer wants a fuller version of a thing, look for its callers first.
+  With none, propose to remove it, not to grow it.
+- **No performative agreement.** No "you're right", "great point" or thanks.
+  State the fix and where it is, or the evidence against. If your pushback
+  was wrong, say so in one line with what you checked, and fix it.
 
 ## Step 1: gather
 

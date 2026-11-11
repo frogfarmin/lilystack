@@ -10,7 +10,7 @@ hooks:
           command: "${CLAUDE_PLUGIN_ROOT}/hooks/freeze.sh"
           statusMessage: "lilystack freeze: checking the boundary"
 ---
-<!-- Lilystack. Rewritten from gstack investigate/SKILL.md.tmpl, investigate/sections/blast-radius.md.tmpl, flake.md.tmpl, race.md.tmpl, polluter.md.tmpl, backlog.md.tmpl and openclaw/skills/gstack-openclaw-investigate/SKILL.md at 466689b (MIT, Copyright (c) 2026 Garry Tan); and compound-engineering-plugin skills/ce-compound/SKILL.md, skills/ce-compound/references/form.md and skills/ce-debug/SKILL.md at 173bd33 (MIT, Copyright (c) 2025 Every); and ECC commands/save-session.md at b38be6a (MIT, Copyright (c) 2026 Affaan Mustafa); the blast radius derives from pstack's blast-radius skill (Lauren Tan, MIT), as gstack's NOTICE records. -->
+<!-- Lilystack. Rewritten from gstack investigate/SKILL.md.tmpl, investigate/sections/blast-radius.md.tmpl, flake.md.tmpl, race.md.tmpl, polluter.md.tmpl, backlog.md.tmpl and openclaw/skills/gstack-openclaw-investigate/SKILL.md at 466689b (MIT, Copyright (c) 2026 Garry Tan); and compound-engineering-plugin skills/ce-compound/SKILL.md, skills/ce-compound/references/form.md and skills/ce-debug/SKILL.md at 173bd33 (MIT, Copyright (c) 2025 Every); and ECC commands/save-session.md at b38be6a (MIT, Copyright (c) 2026 Affaan Mustafa); and superpowers skills/systematic-debugging/SKILL.md at 22f0b46 (MIT, Copyright (c) 2025 Jesse Vincent); the blast radius derives from pstack's blast-radius skill (Lauren Tan, MIT), as gstack's NOTICE records. -->
 
 # investigate: root cause first
 
@@ -74,6 +74,16 @@ failure point, every caller, and where each value was last set. Before you
 call two queries, helpers or code paths duplicates, read their call sites:
 what looks identical often differs in a caller's guard, transaction or scope,
 and the "duplicate" is the one that is right.
+
+- **A working example.** When similar code works (in this codebase, or the
+  reference that the pattern came from, read in full), list every difference
+  between the working one and the broken one, however small. No difference
+  is "can't matter" until a test says so.
+- **Component boundaries.** When the path crosses components (CI to build to
+  signing; API to service to database), log what enters and what leaves each
+  boundary, and the config that each one sees, then run once. The evidence
+  names the boundary that breaks, before any hypothesis. Log a secret as set
+  or unset, never its value.
 
 Common shapes, to check once the trace is under way:
 

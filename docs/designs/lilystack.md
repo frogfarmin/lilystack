@@ -28,7 +28,7 @@ no skill or hook sends data out that the owner did not expect.
 
 | Question | Answer |
 |---|---|
-| Relation to superpowers | Use both, and choose for each project. Superpowers suits known work. The Lilystack sprint suits new ideas. The namespaces keep them apart. Lilystack reads the plan and spec folders of superpowers. |
+| Relation to superpowers | Lilystack stands alone. On 2026-11-12 the techniques that it took from superpowers by reference (plan execution, the test-first discipline, how review is received, proof before a claim, the size triage, landing a branch) came in as diet rewrites; `harvest.md` section 10 lists them. No skill reads the folders of another plugin. |
 | Repo shape | A Claude Code plugin repo, `~/Lilystack`, loaded through `CLAUDE_CODE_PLUGIN_DIRS` on the two Macs. |
 | Port method | A diet rewrite. Keep the questions, checklists, rules and output formats. Write the prose again, short. Record the source of each skill. |
 | Name | `lilystack`. The calls are `/lilystack:<skill>`. |
@@ -139,6 +139,7 @@ each upstream again and compare it with its pin. No script does this.
 |---|---|
 | Think | office-hours, spec |
 | Plan | plan-ceo-review, plan-eng-review, plan-design-review, plan-devex-review, autoplan |
+| Build | build |
 | Check | review, verify, qa, test-audit |
 | Ship | ship, feedback |
 | Anytime | investigate, retro, context-audit, write-skill, prose, frontend-design, security-audit, compound, second-opinion |

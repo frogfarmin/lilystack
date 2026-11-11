@@ -10,7 +10,7 @@ hooks:
           command: "${CLAUDE_PLUGIN_ROOT}/hooks/test-first.sh"
           statusMessage: "lilystack test-first: looking for a changed test"
 ---
-<!-- Lilystack. Rewritten from tdd-guard src/hooks/fileTypeDetection.ts and docs/enforcement.md at ffb7026 (MIT, Copyright (c) 2025 Nizar Selander). -->
+<!-- Lilystack. Rewritten from tdd-guard src/hooks/fileTypeDetection.ts and docs/enforcement.md at ffb7026 (MIT, Copyright (c) 2025 Nizar Selander); and superpowers skills/test-driven-development/SKILL.md and writing-good-tests.md at 22f0b46 (MIT, Copyright (c) 2025 Jesse Vincent). -->
 
 # test-first: a test changes before the code does
 
@@ -29,14 +29,33 @@ status`. Tell the user that, in one line, and what it means:
   `*Test.php` and its Swift, Kotlin and Java kin), any other file, and any
   edit outside git.
 
-When it asks, write or change the failing test first and run it to see it
-fail for the right reason, then make the source edit. Approve the prompt only
-for a change with no behaviour to test (a rename, a comment, config) or when
-the user says to skip.
+When it asks, write or change the failing test first, then make the source
+edit. Approve the prompt only for a change with no behaviour to test (a
+rename, a comment, config) or when the user says to skip.
 
-The discipline itself lives in superpowers' `test-driven-development` skill
-and mattpocock's `tdd` skill; this hook only adds a barrier in front of the
-first source edit.
+## The discipline
+
+The hook is only a barrier in front of the first source edit. The practice
+is these rules, for every test in the session:
+
+- **Name the break.** Before the test body, name the production change that
+  should make this test fail. If you cannot, or only a decision could (the
+  value of a constant, the exact wording of a message), test the behaviour
+  that depends on it instead.
+- **Take the expected value from outside the code.** Use a literal or a
+  hand-checked fixture from the spec. An expectation that the code under
+  test or its helpers compute passes whatever that code does.
+- **Watch it fail for the right reason.** Run the test before the code
+  exists. The right failure is its assertion, because the behaviour is
+  missing. A typo, an import error or bad setup is not that failure: fix it
+  and run again. A pass means the test covers behaviour that already
+  exists: change the test.
+- **Then the least code that passes.** Run the project's suite, not only
+  your file, and report every red by name.
+- **Code written before its test** is not kept beside you as a reference,
+  because a test fitted to it proves nothing. Move it to
+  `~/to-delete/<date>/<original path>` (never delete it) and write it again
+  from the test.
 
 ## Limits
 

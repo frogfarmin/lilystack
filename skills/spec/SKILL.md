@@ -3,7 +3,7 @@ name: spec
 description: Turn a decided request or design doc into an executable spec in docs/specs, with code-grounded acceptance criteria and vertical-slice phases, before anyone builds it
 argument-hint: "[request, or a docs/designs or docs/specs file]"
 ---
-<!-- Lilystack. Rewritten from gstack spec/SKILL.md.tmpl and spec/sections/gate-and-file.md.tmpl at 466689b (MIT, Copyright (c) 2026 Garry Tan); and spec-kit templates/commands/specify.md and clarify.md at d649834 (MIT, Copyright GitHub, Inc.); and ECC skills/intent-driven-development/SKILL.md at b38be6a (MIT, Copyright (c) 2026 Affaan Mustafa). -->
+<!-- Lilystack. Rewritten from gstack spec/SKILL.md.tmpl and spec/sections/gate-and-file.md.tmpl at 466689b (MIT, Copyright (c) 2026 Garry Tan); and spec-kit templates/commands/specify.md and clarify.md at d649834 (MIT, Copyright GitHub, Inc.); and ECC skills/intent-driven-development/SKILL.md at b38be6a (MIT, Copyright (c) 2026 Affaan Mustafa); and superpowers skills/writing-plans/SKILL.md at 22f0b46 (MIT, Copyright (c) 2025 Jesse Vincent). -->
 
 # Spec: pin the work down before it is built
 
@@ -27,16 +27,12 @@ a vague or evasive answer, then record it as an assumption and move on.
 ## Phase 0: target and context
 
 1. Find the project root. Read the instructions file (`CLAUDE.md` or
-   `AGENTS.md`), `STATUS.md`, `docs/designs/*.md` and `docs/specs/*.md`.
-   Also read `docs/superpowers/specs/*.md` and `docs/superpowers/plans/*.md`
-   when they exist; obra/superpowers saves its designs and plans there, and
-   they count as context the same way as `docs/designs/`. Run
-   `git log --oneline -20` and note `git rev-parse --short HEAD` for the
-   spec header.
+   `AGENTS.md`), `STATUS.md`, `docs/designs/*.md` and `docs/specs/*.md`,
+   and `docs/plans/*.md` when it exists. Run `git log --oneline -20` and
+   note `git rev-parse --short HEAD` for the spec header.
 2. The text after the command is the input.
-   - A file: read it in full. A design doc (from `docs/designs/` or
-     `docs/superpowers/specs/`) is the source of truth for the problem, the
-     constraints and the chosen approach. Do not reopen them unless the code
+   - A file: read it in full. A design doc (from `docs/designs/`) is the
+     source of truth for the problem, the constraints and the chosen approach. Do not reopen them unless the code
      contradicts them; then name the contradiction with its line.
    - Text: that is the request.
    - Empty: the first question is "What should change, and for whom?"
@@ -196,9 +192,10 @@ stop and say so; never draft from memory.
    ```
 
    Add `/lilystack:plan-ceo-review docs/specs/<slug>.md` first if the scope
-   still feels big. Say that implementation happens outside this skill, and
-   that `/lilystack:ship` will check each Required AC and each phase box
-   against the diff before it lands. The spec is on disk, so compacting the
+   still feels big. Say that `/lilystack:build docs/specs/<slug>.md` builds
+   an Approved spec task by task, outside this skill, and that
+   `/lilystack:ship` will check each Required AC and each phase box against
+   the diff before it lands. The spec is on disk, so compacting the
    context now is safe.
 
 ## Rules

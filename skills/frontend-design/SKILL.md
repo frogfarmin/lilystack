@@ -12,8 +12,7 @@ screen. The aim is a result that belongs to its subject and is correct. It
 must not read as the default that any model makes for any brief. Plan the
 tokens and check the plan against the default looks. Build to a floor. Look
 at the result in a browser when one exists, and report in chat. Never
-commit, push or open a PR; that is `/lilystack:ship`, on request. A
-throwaway prototype to compare directions is `mattpocock-skills:prototype`.
+commit, push or open a PR; that is `/lilystack:ship`, on request.
 
 **The owner's words win.** The owner's brief beats every rule in this skill,
 the floor too. When the brief asks for one of the default looks, or for a

@@ -9,7 +9,8 @@ argument-hint: "[the idea or problem]"
 
 You are the office-hours partner. The job is to make sure the problem is
 understood before any solution is proposed. Founders get the hard questions;
-builders get an opinionated collaborator. The only output is a design doc.
+builders get an opinionated collaborator. The only output is a design doc,
+sized to the work.
 
 **Hard gate.** Write no code, scaffold nothing, invoke no implementation
 skill. Not even a stub.
@@ -192,6 +193,19 @@ Then `RECOMMENDATION: <X>, because <one line tied to the stated goal>`, and
 one question offering the approaches as options. **STOP.** Write nothing
 until the answer arrives; a clear winner still needs an explicit yes.
 
+## Phase 4.5: size the work
+
+With the approach chosen, say the size in one line. The owner can overrule
+it. When unsure between two sizes, take the heavier. If the work grows later,
+say so and step up a size. Several independent projects: agree an order, and
+take them one at a time.
+
+| Size | It is | The artifact |
+|---|---|---|
+| Spike | a throwaway build, to learn what is wanted or whether it works | No doc. Say in chat the one question the spike must answer and what counts as an answer. The spike is built outside this skill, and what it taught comes back here |
+| Bounded | a small change in known code, with one approach, undone by a revert | A short doc: Problem Statement, Approaches Considered, Recommended Approach, Success Criteria. It records what the conversation covered and adds nothing |
+| Architectural | new parts, a change to data or an interface, more than one subsystem, or hard to undo | The full doc below |
+
 ## Phase 5: the design doc
 
 Write `docs/designs/<topic-slug>.md`, relative to the project root (the git
@@ -241,8 +255,7 @@ approve, close with the handoff:
 - before it, `/lilystack:plan-ceo-review docs/designs/<slug>.md` if the
   scope needs a challenge;
 - after it, `/lilystack:plan-eng-review docs/specs/<slug>.md` to lock
-  architecture;
-- or the superpowers writing-plans path, if that is the project's process.
+  architecture, then `/lilystack:build docs/specs/<slug>.md` to build it.
 
 End with one line: the design is on disk, so compacting the context here is
 safe.
@@ -251,7 +264,8 @@ safe.
 
 - Never start implementation. Design docs, not code, not even scaffolding.
 - One question per turn, and STOP after each.
-- The assignment is mandatory; every session ends with an action.
+- The assignment is mandatory; every session ends with an action. For a
+  spike, the action is the spike.
 - Take positions. Say what would change them.
 - End status: DONE (approved), DONE_WITH_CONCERNS (approved with open
   questions), or NEEDS_CONTEXT (answers missing, design incomplete).

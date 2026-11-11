@@ -3,13 +3,12 @@ name: write-skill
 description: Write a new skill or change, test and slim an existing one on Lilystack's diet; use for "write a skill", "add this lesson to the <name> skill" or "put this skill on a diet"
 argument-hint: "[skill name or folder]"
 ---
-<!-- Lilystack. Rewritten from gstack write-skill/SKILL.md.tmpl and write-skill/references/diet.md at 466689b, and write-skill/SKILL.md.tmpl at 274fb34 (MIT, Copyright (c) 2026 Garry Tan; diet.md adapts nicobailon/skill-diet at 5f41df1, MIT); and anthropics-skills skills/skill-creator/SKILL.md and skills/skill-creator/agents/grader.md at ca45fc4 (Apache-2.0, Copyright 2026 Anthropic, PBC; changed); and claude-plugins-official plugins/plugin-dev/skills/skill-development/SKILL.md, plugins/plugin-dev/agents/skill-reviewer.md and plugins/hookify/agents/conversation-analyzer.md at a1ecfbc (Apache-2.0, Copyright Anthropic, PBC; changed); and compound-engineering-plugin skills/ce-resolve-pr-feedback/references/evaluation-rubric.md at 173bd33 (MIT, Copyright (c) 2025 Every). -->
+<!-- Lilystack. Rewritten from gstack write-skill/SKILL.md.tmpl and write-skill/references/diet.md at 466689b, and write-skill/SKILL.md.tmpl at 274fb34 (MIT, Copyright (c) 2026 Garry Tan; diet.md adapts nicobailon/skill-diet at 5f41df1, MIT); and anthropics-skills skills/skill-creator/SKILL.md and skills/skill-creator/agents/grader.md at ca45fc4 (Apache-2.0, Copyright 2026 Anthropic, PBC; changed); and claude-plugins-official plugins/plugin-dev/skills/skill-development/SKILL.md, plugins/plugin-dev/agents/skill-reviewer.md and plugins/hookify/agents/conversation-analyzer.md at a1ecfbc (Apache-2.0, Copyright Anthropic, PBC; changed); and compound-engineering-plugin skills/ce-resolve-pr-feedback/references/evaluation-rubric.md at 173bd33 (MIT, Copyright (c) 2025 Every); and superpowers skills/writing-skills/SKILL.md at 22f0b46 (MIT, Copyright (c) 2025 Jesse Vincent). -->
 
 # write-skill: skills on Lilystack's diet
 
-Superpowers' writing-skills and mattpocock's writing-for-agents cover general
-skill craft; this is Lilystack's own diet. It writes only the skill being
-changed, and its `NOTICE.md` row in Lilystack.
+Skill craft on Lilystack's diet. It writes only the skill being changed, and
+its `NOTICE.md` row in Lilystack.
 
 ## 1. Find the live file
 
@@ -70,6 +69,19 @@ update the skill in the same change.
 - Imperative mood. Explain why a rule matters instead of shouting it: ALWAYS
   or NEVER in capitals is a yellow flag (the tiers CRITICAL, ASK, STOP stay).
 - Generalize from a failure; a fix that only covers the test prompt is overfit.
+- **Match the form to the failure.** Before you choose the wording, classify
+  what the baseline run did wrong. The form that holds one kind of failure
+  makes another kind worse.
+
+  | The run | Use | Not |
+  |---|---|---|
+  | broke a rule it knew, under pressure | a prohibition, with its reason | soft guidance ("prefer", "consider") |
+  | complied, but the output had the wrong shape | a positive recipe: the parts of the output, in order | a list of don'ts |
+  | left out a required element | a slot in the template that it fills | a reminder in prose beside the template |
+  | should act differently case by case | a conditional on something it can observe ("if the ledger exists, read it") | one rule plus exemptions |
+
+  An agent negotiates with "don't X unless it matters". State a real
+  exception as its own conditional.
 - Cut what the model already knows and what only a human needs (history goes
   in the commit message). Replace a list of cases with the idea behind them.
 - **Instruction prose is not code.** Anyone can find a plausible edge case
@@ -89,6 +101,14 @@ Write two or three realistic test prompts, each with the outcomes that show
 success. The owner runs them in a fresh session and pastes the result back;
 for a change, once on the old version first as the baseline. No subagent runs
 and no `claude -p`.
+
+**A wording test has a no-guidance control.** Run the prompt that tempts the
+failure once with the new line absent. If the control does not show the
+failure, there is nothing to fix: add no line. One sample misleads, so
+compare a few runs of each version where the owner allows the cost. Wording
+that holds makes the runs converge on one shape; five readings in five runs
+means the form is wrong, not that it needs more words. Read each match
+yourself: a quoted counter-example counts as a hit to a pattern search.
 
 **Grade** each outcome PASS or FAIL, quoting the line that proves it. A pass
 needs substance, not surface: the file exists and holds the right content.

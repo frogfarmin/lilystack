@@ -21,10 +21,9 @@ An obvious fix still needs a yes. A recommendation is not approval.
 
 The text after the command names the plan or design file. If it is empty,
 take the newest file in the first of these that has one: `docs/specs/`,
-`docs/plans/`, `docs/superpowers/plans/`, `docs/designs/`,
-`docs/superpowers/specs/`; else the plan or design that `STATUS.md` names.
+`docs/plans/`, `docs/designs/`; else the plan or design that `STATUS.md` names.
 Name the file you took in one line. If none exists, ask for the path and
-stop. A superpowers plan names its design on its `**Spec:**` line: read that
+stop. When the plan names its design (a `Design:` line), read that
 design too, as the source of truth for the problem, the users and the
 constraints.
 

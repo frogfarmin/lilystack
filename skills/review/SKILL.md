@@ -47,9 +47,8 @@ CI/infra | scripts/tooling | mixed`.
 **Plan and scope.** Look for the plan, spec or design for this work in this
 order, and use the first that matches the branch, its feature or the files it
 changes: a path in the arguments, `docs/specs/`, `docs/plans/`,
-`docs/superpowers/plans/`, `docs/designs/`, `docs/superpowers/specs/`, then
-`STATUS.md`. When a plan names its spec or design (a `**Spec:**` line), read
-that too. Write `Plan: <path>` or `Plan: none found`. Then note scope drift
+`docs/designs/`, then `STATUS.md`. When a plan names its spec or design (a
+`Design:` line), read that too. Write `Plan: <path>` or `Plan: none found`. Then note scope drift
 (work outside the stated scope) and plan completion (tasks the plan lists that
 the diff does not finish), both informational unless a listed task is silently
 dropped.
