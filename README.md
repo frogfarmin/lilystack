@@ -1,21 +1,83 @@
 <p align="center"><img src="docs/assets/hero.svg" width="100%" alt="Lilystack: short rewrites of the best Claude Code skills. 33 skills, 5 safety hooks, 46 of 46 evals pass, 0 telemetry. From 15 upstreams, about 2.1k tokens in each session."></p>
 
-**Lilystack is a Claude Code plugin. It has short rewrites of the best skills from the top Claude repositories on GitHub.**
+<p align="center">
+  <a href="https://github.com/frogfarmin/Lilystack/actions/workflows/checks.yml"><img src="https://img.shields.io/github/actions/workflow/status/frogfarmin/Lilystack/checks.yml?branch=main&amp;label=checks" alt="The result of the checks on main"></a>
+  <a href=".claude-plugin/plugin.json"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Ffrogfarmin%2FLilystack%2Fmain%2F.claude-plugin%2Fplugin.json&amp;query=%24.version&amp;label=version&amp;color=047857" alt="The version of the plugin"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/frogfarmin/Lilystack?color=047857" alt="License: MIT"></a>
+</p>
 
-- Each skill is Markdown. Each hook is a bash script.
-- No telemetry, no update check, no background calls. A skill uses the network only when its task needs it, and it tells you what goes out.
-- A browser tool and a second model are opt-in. Claude asks before data goes to another model, and before any commit, push or pull request.
-- Each skill names its source and its license on its first line.
-- 🌱 **Original** marks a part that Lilystack made itself. All other parts are rewrites of an upstream.
-- The plugin uses about 2,100 tokens in each session before a skill starts (`claude plugin details lilystack`).
+<p align="center">
+  <b>Lilystack is a Claude Code plugin.</b><br>
+  It has short rewrites of the best skills from the top Claude repositories on GitHub.
+</p>
 
-[What is inside](#what-is-inside) · [Quick start](#quick-start) · [Everyday use](#everyday-use) · [Safety](#safety-hooks) · [Evals](#evals) · [Checks](#checks) · [Sources](#where-the-skills-come-from)
+<p align="center">
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#everyday-use">Everyday use</a> ·
+  <a href="#what-is-inside">What is inside</a> ·
+  <a href="#safety-hooks">Safety</a> ·
+  <a href="#mods-optional">Mods</a> ·
+  <a href="#evals">Evals</a> ·
+  <a href="#checks">Checks</a> ·
+  <a href="#where-the-skills-come-from">Sources</a>
+</p>
+
+## What you get
+
+- **Small.** Each skill is Markdown. Each hook is a bash script. The plugin uses about 2,100 tokens in each session before a skill starts (`claude plugin details lilystack`).
+- **Quiet.** No telemetry, no update check, no background calls. A skill uses the network only when its task needs it, and it tells you what goes out.
+- **It asks first.** Claude asks before any commit, push or pull request, and before data goes to another model. A browser tool and a second model are opt-in.
+- **Clear sources.** Each skill names its source and its license on its first line. 🌱 **Original** marks a part that Lilystack made itself. All other parts are rewrites of an upstream.
+
+## Quick start
+
+You need Claude Code, `jq` (the hooks use it) and `zsh` (only for the checks and `bin/lily`).
+
+1. Install the plugin from GitHub:
+
+   ```sh
+   claude plugin marketplace add frogfarmin/Lilystack
+   claude plugin install lilystack@lilystack
+   ```
+
+2. Start Claude Code. Type `/plugin`. The list must show `lilystack`.
+3. Start with `/lilystack:office-hours <idea>`, or call the skill that you need.
+
+<details>
+<summary>Other ways to install, how to upgrade, and what to do if it does not load</summary>
+
+- **From a clone.** Clone this repo, then use the folder: `claude plugin marketplace add ./Lilystack`.
+- **With no install step.** `export CLAUDE_CODE_PLUGIN_DIRS="$HOME/Lilystack"` loads the clone for each session. Then `/plugin` shows `lilystack@inline`.
+- **To make sure that it loaded:** `/plugin` shows `lilystack`, and the `/` menu shows `lilystack:<skill>`.
+- **The variable does not arrive.** Sometimes Claude Code does not receive `CLAUDE_CODE_PLUGIN_DIRS`, for example when you start the app outside a shell. Then use the marketplace install. It keeps its state in `~/.claude/plugins/`.
+- **Upgrade:** `claude plugin marketplace update lilystack`, or `git pull` in your clone.
+- **jq is missing:** the hooks fail closed and tell you to install `jq`.
+
+</details>
+
+## Everyday use
+
+| I want to | Run |
+|---|---|
+| Examine a new idea | `/lilystack:office-hours <idea>` |
+| Make a spec that I can test | `/lilystack:spec <request>` |
+| Review a plan from every side | `/lilystack:autoplan <plan>` |
+| Build an approved spec | `/lilystack:build <spec>` |
+| Merge a change | `/lilystack:review`, then `/lilystack:verify`, then `/lilystack:ship` |
+| Answer review comments | `/lilystack:feedback <PR>` |
+| Find the cause of a bug | `/lilystack:investigate <symptom>` |
+| Keep a hard-won fix | `/lilystack:compound` |
+| Get another model's view | `/lilystack:second-opinion review` |
+| Work near something fragile | `/lilystack:guard <dir>` |
+| Make a text easy to read | `/lilystack:prose <file> --ste` |
 
 ## What is inside
 
-<p align="center"><img src="docs/assets/map.svg" width="100%" alt="Map of Lilystack. The sprint: 1 Think (office-hours, spec), 2 Plan (plan-ceo-review, plan-eng-review, plan-design-review, plan-devex-review, autoplan), 3 Check (review, verify, qa, test-audit), 4 Ship (ship, feedback). Safety hooks: careful, secrets, secure, test-first, freeze, unfreeze, guard. Anytime: investigate, retro, context-audit, write-skill, prose, frontend-design, security-audit, compound, second-opinion. Lily tools: bin/lily, lily-check, lily-lint, lily-sweep, and the mods status, verify-gate, outbound-ledger and focus. Also inside: the lens agent, the ste output style and the evals."></p>
+<p align="center"><img src="docs/assets/map.svg" width="100%" alt="Map of Lilystack. The sprint has five steps: 1 Think (office-hours, spec), 2 Plan (plan-ceo-review, plan-eng-review, plan-design-review, plan-devex-review, autoplan), 3 Build (build), 4 Check (review, verify, qa, test-audit), 5 Ship (ship, feedback). Anytime: investigate, retro, context-audit, write-skill, prose, frontend-design, security-audit, compound, second-opinion. Safety hooks: careful, secrets, secure, test-first, freeze, unfreeze, guard. Mods: focus, verify-gate, outbound-ledger, status. Lily tools: bin/lily, lily-check, lily-lint, lily-sweep. Also inside: the lens agent, the ste output style, the evals and the marketplace."></p>
 
-Each call starts with `/lilystack:`. For example, type `/lilystack:spec`. An argument in `[ ]` is optional. If a skill needs an argument that you did not give, it asks for it.
+- Each call starts with `/lilystack:`. For example, type `/lilystack:spec`.
+- An argument in `[ ]` is optional. If a skill needs an argument that you did not give, it asks for it.
+- The sprint has five steps. Use it from 1 to 5, or call any skill alone.
 
 ### 1. Think
 
@@ -34,13 +96,13 @@ Each call starts with `/lilystack:`. For example, type `/lilystack:spec`. An arg
 | [`plan-devex-review`](skills/plan-devex-review) | Scores the developer experience of a plan: time to hello world, errors, docs, upgrades. For a CLI, API, SDK, library or plugin. Arguments: `[plan]`. |
 | [`autoplan`](skills/autoplan) | Runs all the plan reviews that apply, in order. It decides the mechanical choices, asks the taste choices at one gate at the end, and never decides a User Challenge for you. Arguments: `[plan]`. |
 
-### Build
+### 3. Build
 
 | Skill&nbsp;name&nbsp;that&nbsp;you&nbsp;type | What it does |
 |---|---|
 | [`build`](skills/build) | Builds an approved spec task by task in the session, with a failing test first for each task. It records each ruling in `docs/ledgers/`, stops only for destructive, security, outward-facing or stuck cases, and ends with one review of the whole branch. Arguments: `[spec or plan]`. |
 
-### 3. Check
+### 4. Check
 
 | Skill&nbsp;name&nbsp;that&nbsp;you&nbsp;type | What it does |
 |---|---|
@@ -49,7 +111,7 @@ Each call starts with `/lilystack:`. For example, type `/lilystack:spec`. An arg
 | [`qa`](skills/qa) | Probes CLI, API, job, webhook and web page behaviour against the contract. A page needs a browser tool. It reports first. It repairs only a batch that you approve. `--quick` and `--exhaustive` set the depth. Arguments: `[surface] [--fix]`. |
 | [`test-audit`](skills/test-audit) | Finds the tests that cost more than they protect, with evidence for each. It changes nothing until you approve. `--since <ref>` limits it to recent tests. Arguments: `[path ...]`. |
 
-### 4. Ship
+### 5. Ship
 
 | Skill&nbsp;name&nbsp;that&nbsp;you&nbsp;type | What it does |
 |---|---|
@@ -85,63 +147,58 @@ Call a safety skill, and its hook is active until the session ends. You must cal
 | [`freeze`](skills/freeze) | Limits edits and Bash writes to one folder. [`unfreeze`](skills/unfreeze) removes the limit. Arguments: `[dir]`. |
 | [`guard`](skills/guard) | Starts careful, secrets, secure and freeze with one call. Arguments: `[dir]`. |
 
-careful, secrets and secure read a plain rules file beside the script (`hooks/*-patterns.txt`). freeze and test-first keep their few rules in the script. "Edit, Write" in the image also means MultiEdit, and NotebookEdit for secrets, secure and freeze.
+- careful, secrets and secure read a plain rules file beside the script (`hooks/*-patterns.txt`). freeze and test-first keep their few rules in the script.
+- "Edit, Write" in the image also means MultiEdit, and NotebookEdit for secrets, secure and freeze.
+- A guard matches text, so it is a guardrail, not a security boundary. Keep your own permission rules in `settings.json`. See [`SECURITY.md`](SECURITY.md).
+
+### Mods (optional)
+
+A mod adds a part to the Claude Code interface: a band above the prompt, a pane, or a stop on a tool call. All four mods are 🌱 **Original**.
+
+- A mod is not a part of the lilystack plugin. You add each mod by itself.
+- No mod uses the network. Each README tells what the mod can reach.
+- **To add focus, verify-gate or outbound-ledger:** add the marketplace first (see [Quick start](#quick-start)). Then run `claude plugin install <mod>@lilystack`. In the desktop app, click **+** next to the prompt box, then **Plugins**, then add the plugin.
+- **To add status:** name its folder in `CLAUDE_CODE_PLUGIN_DIRS`. The marketplace does not list it. See [`mods/status/README.md`](mods/status/README.md).
+
+| Mod&nbsp;that&nbsp;you&nbsp;can&nbsp;add | What it does |
+|---|---|
+| [`focus`](mods/focus) | A pane shows one main action and the few tasks after it. You check them off. Claude keeps the list current and follows up. |
+| [`verify-gate`](mods/verify-gate) | Shows **✅ APPROVED** above the prompt only when the checks pass on the committed and pushed tree, and it stops `gh pr merge` until then. |
+| [`outbound-ledger`](mods/outbound-ledger) | A pane records each outward action of the session: pushes, `gh`, web calls, MCP writes and artifacts. It only records. |
+| [`status`](mods/status) | Keeps the `STATUS.md` of a project correct and shows a band above the prompt. |
 
 ### Lily tools (optional)
 
-These are the author's own tools. They are all 🌱 **Original**. The `lily` tool and the `lily-*` skills act on a clone of the author's hub repo (config and ideas), [Lilypad](https://github.com/frogfarmin/Lilypad), at `~/Lilypad`, not on the project that you are in. Without a `~/Lilypad` folder they do nothing useful, so you can ignore them. You can also read or fork Lilypad as an example. The status mod works in any project.
+These are the author's own tools. They are all 🌱 **Original**. The `lily` tool and the `lily-*` skills act on a clone of the author's hub repo (config and ideas), [Lilypad](https://github.com/frogfarmin/Lilypad), at `~/Lilypad`, not on the project that you are in. Without a `~/Lilypad` folder they do nothing useful, so you can ignore them. You can also read or fork Lilypad as an example.
 
-| Item&nbsp;or&nbsp;skill | What it does |
+| Tool&nbsp;or&nbsp;skill&nbsp;name | What it does |
 |---|---|
-| [`bin/lily`](bin/lily) | 🌱 **Original.** The Lilypad link tool. It links Lilypad's config into place. Commands: `link`, `check`, `adopt`, `lint`, `sweep`, `pull`. |
-| [`lily-check`](skills/lily-check) | 🌱 **Original.** Finds and repairs broken links. Asks before a repair. |
-| [`lily-lint`](skills/lily-lint) | 🌱 **Original.** Gives a hygiene report for Lilypad, with a fix for each finding. |
-| [`lily-sweep`](skills/lily-sweep) | 🌱 **Original.** Moves files to `~/to-delete`. You start it, not Claude. Arguments: `[path ...]`. |
-| [`mods/status`](mods/status) | 🌱 **Original.** A separate mod, loaded through `CLAUDE_CODE_PLUGIN_DIRS`. It keeps `STATUS.md` correct and shows a band above the prompt. |
-| [`mods/verify-gate`](mods/verify-gate) | 🌱 **Original.** A separate mod. It shows **✅ APPROVED** above the prompt only when the checks pass on the committed and pushed tree, and it stops `gh pr merge` until then. Install: `verify-gate@lilystack`. |
-| [`mods/outbound-ledger`](mods/outbound-ledger) | 🌱 **Original.** A separate mod. A pane records each outward action of the session: pushes, `gh`, web calls, MCP writes and artifacts. It only records. Install: `outbound-ledger@lilystack`. |
-| [`mods/focus`](mods/focus) | 🌱 **Original.** A separate mod. A pane shows one main action and the few tasks after it. You check them off. Claude keeps the list current and follows up. Install: `focus@lilystack`. |
+| [`bin/lily`](bin/lily) | The Lilypad link tool. It links Lilypad's config into place. Commands: `link`, `check`, `adopt`, `lint`, `sweep`, `pull`. |
+| [`lily-check`](skills/lily-check) | Finds and repairs broken links. Asks before a repair. |
+| [`lily-lint`](skills/lily-lint) | Gives a hygiene report for Lilypad, with a fix for each finding. |
+| [`lily-sweep`](skills/lily-sweep) | Moves files to `~/to-delete`. You start it, not Claude. Arguments: `[path ...]`. |
+
+<details>
+<summary>The author's setup: Lilystack and Lilypad on two Macs</summary>
+
+The author keeps config and ideas in a second repo, [Lilypad](https://github.com/frogfarmin/Lilypad), and uses Lilystack on two Macs, in the Claude desktop app. The desktop app loads Lilystack from its marketplace, which Lilypad's `Claude/settings.json` names.
+
+<p align="center"><img src="docs/assets/repos.svg" width="100%" alt="How Lilystack and Lilypad fit in the author's setup. Lilypad holds the config: links.conf and the config files. bin/lily in Lilystack reads links.conf and makes symlinks on the two Macs. Claude Code on the Macs loads the Lilystack skills and hooks from its marketplace. The main Mac also loads the status mod. lily pull updates Lilystack first, then Lilypad; then run lily check."></p>
+
+- **`bin/lily`** (zsh) links Lilypad's config into the home folder from Lilypad's `links.conf`. Its root is `$HOME/Lilypad`; `LILYPAD_ROOT` changes it. The commands are `link`, `check`, `adopt`, `lint`, `sweep` and `pull`. `pull` runs `git pull --ff-only` in Lilystack, then in Lilypad, and reports each result. Lilypad's `bin/lily` is a shim that runs this file.
+- **Upgrade order on each Mac:** pull Lilystack first, then Lilypad, then run `~/Lilypad/bin/lily check`. `~/Lilypad/bin/lily pull` does the two pulls in that order, fast-forward only.
+- **The mods.** The status mod loads only on the main Mac, in a terminal session that sets `CLAUDE_CODE_PLUGIN_DIRS`. The marketplace lists focus, verify-gate and outbound-ledger, so the desktop app can install them.
+
+</details>
 
 ### Also inside
 
 | Part&nbsp;of&nbsp;the&nbsp;plugin | What it does |
 |---|---|
-| [`marketplace`](.claude-plugin/marketplace.json) | A one-plugin marketplace, so that you can install Lilystack with `claude plugin install`, from the folder or from GitHub. |
+| [`marketplace`](.claude-plugin/marketplace.json) | A marketplace file, so that you can install Lilystack with `claude plugin install`, from the folder or from GitHub. It lists the plugin and three of the mods. |
 | [`lens`](agents/lens.md) | 🌱 **Original.** An agent: a read-only subagent for one review lens. review, security-audit, plan-design-review and autoplan send it (review also when ship runs it), and build sends it when you ask for a review of each task. Its tools are Read, Grep and Glob, so it cannot edit or run a command. |
 | [`ste`](output-styles/ste.md) | 🌱 **Original.** An output style: Claude writes each reply in ASD-STE100 Simplified Technical English. It is off until you choose it with `/output-style lilystack:ste`. |
 | [`evals`](evals) | 🌱 **Original.** An eval suite: 48 cases for `claude plugin eval`. Each skill must start on its own request, and must not start on a near-miss. A quality case examines the output of prose. See [Evals](#evals). |
-
-## Quick start
-
-You need Claude Code, `jq` (the hooks use it) and `zsh` (only for the checks and `bin/lily`).
-
-1. Install the plugin from GitHub:
-
-   ```sh
-   claude plugin marketplace add frogfarmin/Lilystack
-   claude plugin install lilystack@lilystack
-   ```
-
-   - Or clone this repo, then use the folder: `claude plugin marketplace add ./Lilystack`.
-   - Or load the clone for each session: `export CLAUDE_CODE_PLUGIN_DIRS="$HOME/Lilystack"`. Then `/plugin` shows `lilystack@inline`.
-2. Start Claude Code. Type `/plugin`. The list must show `lilystack`.
-3. Start with `/lilystack:office-hours <idea>`, or call the skill that you need.
-
-## Everyday use
-
-| I want to | Run |
-|---|---|
-| Examine a new idea | `/lilystack:office-hours <idea>` |
-| Make a spec that I can test | `/lilystack:spec <request>` |
-| Build an approved spec | `/lilystack:build <spec>` |
-| Review a plan from every side | `/lilystack:autoplan <plan>` |
-| Merge a change | `/lilystack:review`, then `/lilystack:verify`, then `/lilystack:ship` |
-| Get another model's view | `/lilystack:second-opinion review` |
-| Keep a hard-won fix | `/lilystack:compound` |
-| Answer review comments | `/lilystack:feedback <PR>` |
-| Find the cause of a bug | `/lilystack:investigate <symptom>` |
-| Work near something fragile | `/lilystack:guard <dir>` |
-| Make a text easy to read | `/lilystack:prose <file> --ste` |
 
 ## Evals
 
@@ -151,7 +208,12 @@ You need Claude Code, `jq` (the hooks use it) and `zsh` (only for the checks and
 claude plugin eval . --tag trigger --ablation none --no-publish
 ```
 
-The last full run (`--runs 1`, on 2026-11-06) passed 45 of 46 cases for $2.46. A rerun of the quality case after a repair passed for $0.15, so all 46 cases of that run pass. The two `build` cases came on 2026-11-12 and have not run yet. The trigger graders need no model. The quality case also asks a judge model; run it with `--tag quality`. `--no-publish` keeps the report on your machine. Each run starts real Claude sessions, so it costs money. It is not one of the five checks. See [`evals/README.md`](evals/README.md).
+- **The last full run** (`--runs 1`, on 2026-11-06) passed 45 of 46 cases for $2.46. A rerun of the quality case after a repair passed for $0.15, so all 46 cases of that run pass.
+- **Not run yet:** the two `build` cases. They came on 2026-11-12.
+- **Graders.** The trigger graders need no model. The quality case also asks a judge model; run it with `--tag quality`.
+- **Cost.** Each run starts real Claude sessions, so it costs money. It is not one of the five checks. `--no-publish` keeps the report on your machine.
+
+See [`evals/README.md`](evals/README.md).
 
 ## Checks
 
@@ -163,13 +225,16 @@ zsh tests/test-lily.zsh        # bin/lily, in a temporary HOME and Lilypad root
 claude plugin validate .       # the manifest and the layout
 ```
 
-After a change to a mod in `mods/`, also run `claude plugin validate .` and `claude plugin test` in that mod's folder. The details are in [`AGENTS.md`](AGENTS.md#checks).
+CI runs the four zsh checks on each push to `main` and each pull request. After a change to a mod in `mods/`, also run `claude plugin validate .` and `claude plugin test` in that mod's folder. The details are in [`AGENTS.md`](AGENTS.md#checks).
 
 ## Where the skills come from
 
 <p align="center"><img src="docs/assets/harvest.svg" width="100%" alt="How the harvest worked. Four research agents read 25 top repositories at fixed commits. Text and rules came from twelve MIT sources and three Apache-2.0 sources. Ideas only came from five more. Six were not taken, each for a stated reason. The steps: read the license, keep the core, remove the runtime. The result: 33 skills, 5 hooks, 1 lens agent, 48 evals."></p>
 
-Each skill is a short rewrite. It keeps the questions, the checklists, the rules and the output formats of its source, and removes the runtime. [`docs/designs/harvest.md`](docs/designs/harvest.md) tells how the harvest found the sources, and why it did not take other repositories. [`NOTICE.md`](NOTICE.md) has the notices and one row for each skill.
+Each skill is a short rewrite. It keeps the questions, the checklists, the rules and the output formats of its source, and removes the runtime.
+
+- [`docs/designs/harvest.md`](docs/designs/harvest.md) tells how the harvest found the sources, and why it did not take other repositories.
+- [`NOTICE.md`](NOTICE.md) has the notices and one row for each skill.
 
 | Upstream | What Lilystack took | License |
 |---|---|---|
@@ -190,29 +255,7 @@ Each skill is a short rewrite. It keeps the questions, the checklists, the rules
 | [mattpocock/skills](https://github.com/mattpocock/skills), [humanlayer/humanlayer](https://github.com/humanlayer/humanlayer), [trailofbits/skills](https://github.com/trailofbits/skills) | Ideas only, written again in Lilystack's words | MIT, Apache-2.0, CC-BY-SA-4.0 |
 | task-observer, skill-diet, pstack, disler/claude-code-hooks-mastery | Ideas only (see `NOTICE.md`) | CC-BY-4.0, MIT, MIT, none |
 
-<details>
-<summary>Install notes</summary>
-
-- **To make sure that it loaded:** `/plugin` shows `lilystack`, and the `/` menu shows `lilystack:<skill>`.
-- **The variable.** `CLAUDE_CODE_PLUGIN_DIRS` loads a clone with no install step. Sometimes Claude Code does not receive the variable, for example when you start the app outside a shell. Then use the marketplace install. It keeps its state in `~/.claude/plugins/`.
-- **Upgrade:** `claude plugin marketplace update lilystack`, or `git pull` in your clone.
-- **jq is missing:** the hooks fail closed and tell you to install `jq`.
-
-</details>
-
-<details>
-<summary>The author's setup: Lily and the status mod</summary>
-
-These are the author's own tools (🌱 **Original**). The author keeps config and ideas in a second repo, [Lilypad](https://github.com/frogfarmin/Lilypad), and uses Lilystack on two Macs, in the Claude desktop app. The desktop app loads Lilystack from its marketplace, which Lilypad's `Claude/settings.json` names.
-
-<p align="center"><img src="docs/assets/repos.svg" width="100%" alt="How Lilystack and Lilypad fit in the author's setup. Lilypad holds the config: links.conf and the config files. bin/lily in Lilystack reads links.conf and makes symlinks on the two Macs. Claude Code on the Macs loads the Lilystack skills and hooks from its marketplace. The main Mac also loads the status mod. lily pull updates Lilystack first, then Lilypad; then run lily check."></p>
-
-- **`bin/lily`** (zsh) links Lilypad's config into the home folder from Lilypad's `links.conf`. Its root is `$HOME/Lilypad`; `LILYPAD_ROOT` changes it. The commands are `link`, `check`, `adopt`, `lint`, `sweep` and `pull`. `pull` runs `git pull --ff-only` in Lilystack, then in Lilypad, and reports each result. Lilypad's `bin/lily` is a shim that runs this file.
-- **Upgrade order on each Mac:** pull Lilystack first, then Lilypad, then run `~/Lilypad/bin/lily check`. `~/Lilypad/bin/lily pull` does the two pulls in that order, fast-forward only.
-- **`mods/status`** is a Claude Code mod. It keeps the `STATUS.md` of a project correct and shows a band above the prompt. It is not a part of the lilystack plugin. It loads only where `CLAUDE_CODE_PLUGIN_DIRS` names it. See [`mods/status/README.md`](mods/status/README.md).
-- **`mods/verify-gate`, `mods/outbound-ledger` and `mods/focus`** are Claude Code mods too. The marketplace lists each one, so the desktop app can install them: click **+** next to the prompt box, then **Plugins**, then add the plugin. Each README tells what the mod can reach. None of them uses the network.
-
-</details>
+## More
 
 <details>
 <summary>Why Lilystack exists</summary>
@@ -234,11 +277,11 @@ More: the design is in [`docs/designs/lilystack.md`](docs/designs/lilystack.md),
 </details>
 
 <details>
-<summary>Layout</summary>
+<summary>Layout of the repo</summary>
 
 ```
 .claude-plugin/plugin.json   the manifest (name lilystack)
-.claude-plugin/marketplace.json  a one-plugin marketplace, for the fallback install
+.claude-plugin/marketplace.json  the marketplace: the plugin and three of the mods
 .claude-plugin/icon.png      the plugin icon
 AGENTS.md                    how to work on this repo, and the diet rules
 NOTICE.md                    the upstream notices, the pins, one row for each skill
@@ -268,7 +311,8 @@ SECURITY.md                  how to report a security problem
 
 ## Contributing and security
 
-Read [`AGENTS.md`](AGENTS.md) before a change, and run the five [checks](#checks). To report a security problem, read [`SECURITY.md`](SECURITY.md).
+- **Before a change:** read [`AGENTS.md`](AGENTS.md), and run the five [checks](#checks).
+- **To report a security problem:** read [`SECURITY.md`](SECURITY.md). Do not open a public issue.
 
 ## Credits
 

@@ -10,7 +10,7 @@
     {
       "name": "lilystack",
       "source": "./",
-      "description": "The best Claude Code skills from top GitHub repositories, in short rewrites: think, plan, check and ship, plus bash safety hooks. Markdown and bash; no telemetry"
+      "description": "The best Claude Code skills from top GitHub repositories, in short rewrites: think, plan, build, check and ship, plus bash safety hooks. Markdown and bash; no telemetry"
     },
     {
       "name": "verify-gate",
