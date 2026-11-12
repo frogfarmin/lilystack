@@ -54,7 +54,7 @@ changed" when true.>
 ## Plan
 <Checklist from Step 7: done, changed, partial and not-done tasks; each
 Required AC with its evidence; any contradiction with the spec; the
-executor's rulings and deferrals from a superpowers ledger, quoted. Omit when
+builder's rulings and deferrals from the build ledger, quoted. Omit when
 no plan was found.>
 
 ## What is not done

@@ -3,7 +3,7 @@
 Date: 2026-11-06. Status: done. Read this file before you add material from an
 upstream repository.
 
-<p align="center"><img src="../assets/harvest.svg" width="100%" alt="How the harvest worked. Four research agents read 25 top repositories at fixed commits. Text and rules came from twelve MIT sources and three Apache-2.0 sources. Ideas only came from five more. Six were not taken, each for a stated reason. The steps: read the license, keep the core, remove the runtime. The result: 32 skills, 5 hooks, 1 lens agent, 46 evals."></p>
+<p align="center"><img src="../assets/harvest.svg" width="100%" alt="How the harvest worked. Four research agents read 25 top repositories at fixed commits. Text and rules came from twelve MIT sources and three Apache-2.0 sources. Ideas only came from five more. Six were not taken, each for a stated reason. The steps: read the license, keep the core, remove the runtime. The result: 33 skills, 5 hooks, 1 lens agent, 48 evals."></p>
 
 ## 1. Goal
 
@@ -42,10 +42,10 @@ in if all of these are true:
 - It sends nothing out that the owner does not expect: no telemetry, no
   update check, no background calls. A browser or a second model is opt-in.
 - It asks before an outward or irreversible action.
-- It does a task that Lilystack and the owner's other skills do not do now.
-  The owner also runs superpowers and mattpocock's skills in full. A
-  candidate that only copies one of those skills gets a cross-reference, not
-  a port.
+- It does a task that Lilystack does not do now. A candidate that only
+  copies a Lilystack skill becomes an edit to that skill, not a second one.
+  (Until 2026-11-12 this rule also left out what superpowers and
+  mattpocock's skills did; section 10 records the change.)
 
 ## 4. What went in
 
@@ -78,10 +78,10 @@ guard now starts careful, secrets, secure and freeze together.
 | careful | Closed six silent bypasses (`/bin/rm`, `\rm`, a subshell, `bash -c`, `ssh`, `$(...)`), more deny targets, and 31 new rules (45 in all) | New rules, written from the behaviour of each tool |
 | freeze | Also asks when a Bash command writes outside the boundary (`>`, `tee`, `sed -i`, `cp`, `mv`, and more). Repaired a `..` bypass under a folder that does not exist | An idea from tdd-guard's enforcement notes |
 | review | A security lens, four narrow lenses (silent failures, comments, tests, types), a larger adversarial pass, anchored confidence, a validation pass, a rules-file lens, a lean lens, and new checklist rows | claude-plugins-official security-guidance, pr-review-toolkit, code-review and feature-dev; compound-engineering adversarial and API-contract reviewers; agent-skills; Karpathy's guidelines; ponytail; ideas from Trail of Bits and mattpocock |
-| ship | Reads specs and superpowers plans, examines each acceptance criterion with evidence, a docs coverage map, a mutation probe for weak tests, `Closes #N` only when the spec is complete | gstack document-release and spec; spec-kit converge; agent-skills; compound-engineering testing reviewer; superpowers file layout; ideas from mattpocock's pr and tdd |
+| ship | Reads specs and plans, examines each acceptance criterion with evidence, a docs coverage map, a mutation probe for weak tests, `Closes #N` only when the spec is complete | gstack document-release and spec; spec-kit converge; agent-skills; compound-engineering testing reviewer; superpowers file layout; ideas from mattpocock's pr and tdd |
 | verify | Offers the mutation probe | agent-skills; compound-engineering testing reviewer |
-| plan-ceo-review | Reads specs and superpowers plans; tags each decision Mechanical, Taste or User Challenge; "a later with no trigger is a delay" | gstack autoplan; task-observer |
-| plan-eng-review | Reads specs and superpowers plans; a document coherence pass; the lean ladder; "a later with no trigger is a delay" | compound-engineering coherence reviewer; superpowers writing-plans; ponytail; task-observer |
+| plan-ceo-review | Reads specs and plans; tags each decision Mechanical, Taste or User Challenge; "a later with no trigger is a delay" | gstack autoplan; task-observer |
+| plan-eng-review | Reads specs and plans; a document coherence pass; the lean ladder; "a later with no trigger is a delay" | compound-engineering coherence reviewer; superpowers writing-plans; ponytail; task-observer |
 | office-hours | A builder read before approval; spec as the next step; when to compact | superpowers brainstorming; agent-skills interview-me; ECC strategic-compact |
 | investigate | A performance recipe; a prevention ladder after a fix; a record of what did not work | agent-skills performance-optimization; compound-engineering ce-compound and ce-debug; ECC save-session |
 | retro | The prevention ladder in the habits; a ledger of marked shortcuts | compound-engineering; ponytail-debt |
@@ -100,7 +100,7 @@ guard now starts careful, secrets, secure and freeze together.
 
 | Item | Reason |
 |---|---|
-| superpowers and mattpocock skills (TDD, debugging, plans, worktrees, grilling, handoff, and more) | The owner already runs them. Lilystack now reads their plan and spec folders instead |
+| The rest of superpowers (worktree setup, parallel agent dispatch, the visual companion, its session-start skill) and mattpocock's skills beyond the ideas in `NOTICE.md` | A runtime, an orchestration, or a task that a Lilystack skill does now. Section 10 lists what came in from superpowers |
 | anthropics-skills docx, pdf, pptx, xlsx | Source-available. No derivative works |
 | anthropics-skills doc-coauthoring | No license file |
 | claude-plugins-official claude-security | Proprietary license |
@@ -111,7 +111,7 @@ guard now starts careful, secrets, secure and freeze together.
 | The security-guidance reviews by a model, tdd-guard as shipped, caveman compress | They call a model. review keeps the rubric of security-guidance as text |
 | ralph-loop, the planning-with-files hooks, the fp-check Stop hooks | A loop that prompts Claude again, or a Stop gate |
 | hookify as a plugin, diet103 skill activation, session-report, receipts | A Python or Node runtime. write-skill keeps hookify's list of frustration signals |
-| wshobson/agents, ECC agents, compound-engineering orchestration | Persona agents or orchestration. Lilystack sends only read-only subagents (the lens), from review, security-audit and the plan skills |
+| wshobson/agents, ECC agents, compound-engineering orchestration | Persona agents or orchestration. Lilystack sends read-only subagents (the lens), from review, security-audit and the plan skills. The one writer is build's implementer, and only on request (section 10) |
 | caveman, the output-style plugins of others | They set a voice. The owner's CLAUDE.md sets the voice. Lilystack's own `ste` style is opt-in, and it changes only the grammar |
 | webapp-testing, the hallmark build flow | Python and Node tools that duplicate the qa browser section and frontend-design. The rules are in; the tools are not |
 | gstack autoplan in unattended mode | It decides questions without the owner. Lilystack's autoplan (section 9) asks each User Challenge |
@@ -188,3 +188,35 @@ then came in. Eight writer agents did the rewrites.
 
 destructive_command_guard stays out. Its license, not a Lilystack rule,
 forbids any use by or for Anthropic.
+
+## 10. The superpowers fold-in (2026-11-12)
+
+Lilystack no longer assumes that superpowers, or any other plugin, is
+installed. Five skills pointed at superpowers for a technique. Each
+technique is now a diet rewrite from superpowers at its pin, `22f0b46` (MIT).
+
+| Part | What came in | superpowers source |
+|---|---|---|
+| build (new) | Runs an approved spec task by task: a failing test first, a ledger of rulings in `docs/ledgers/`, four stops, one review of the whole branch. Subagents (an implementer, then the lens) are opt-in | executing-plans; writing-plans |
+| spec | An Interfaces line for each task (consumes, produces) and a Review focus section | writing-plans |
+| test-first | The discipline: name the break, take the expected value from outside the code, watch the test fail for the right reason | test-driven-development and its writing-good-tests |
+| feedback | The stance: restate, verify against the code, clarify every unclear item first, grep for usage, no performative agreement | receiving-code-review |
+| verify | A table of what proves each claim; the hedge words | verification-before-completion |
+| office-hours | The size triage: spike, bounded or architectural, with the artifact sized to match | brainstorming |
+| write-skill | Match the form to the failure; the no-guidance control | writing-skills |
+| ship | The landing step: merge locally, push and open a PR, or keep the branch; discard only on the typed word; worktree cleanup with no force | finishing-a-development-branch |
+| investigate | A working example and its differences; logs at each component boundary | systematic-debugging |
+
+What the rewrites cut: the `.superpowers/` workspace and its scripts,
+commits with no question, the "REQUIRED SUB-SKILL" chains, the capitals and
+the rationalization tables. Where upstream deletes (code written before its
+test, a discarded branch), Lilystack moves the files to `~/to-delete/`.
+
+Two points differ from the pin. Upstream sizes work as a small change or a
+project, with a spike beside them; the three names and "when unsure, take
+the heavier" are Lilystack's. Upstream keeps its ledger under
+`.superpowers/sdd/`; Lilystack keeps it in `docs/ledgers/`, a path that
+`AGENTS.md` diet rule 5 now lists.
+
+The plan skills, review, ship, spec and second-opinion no longer search
+`docs/superpowers/`.

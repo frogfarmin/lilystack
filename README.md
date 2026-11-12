@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/assets/hero.svg" width="100%" alt="Lilystack: short rewrites of the best Claude Code skills. 32 skills, 5 safety hooks, 46 of 46 evals pass, 0 telemetry. From 15 upstreams, about 2.1k tokens in each session."></p>
+<p align="center"><img src="docs/assets/hero.svg" width="100%" alt="Lilystack: short rewrites of the best Claude Code skills. 33 skills, 5 safety hooks, 46 of 46 evals pass, 0 telemetry. From 15 upstreams, about 2.1k tokens in each session."></p>
 
 **Lilystack is a Claude Code plugin. It has short rewrites of the best skills from the top Claude repositories on GitHub.**
 
@@ -34,6 +34,12 @@ Each call starts with `/lilystack:`. For example, type `/lilystack:spec`. An arg
 | [`plan-devex-review`](skills/plan-devex-review) | Scores the developer experience of a plan: time to hello world, errors, docs, upgrades. For a CLI, API, SDK, library or plugin. Arguments: `[plan]`. |
 | [`autoplan`](skills/autoplan) | Runs all the plan reviews that apply, in order. It decides the mechanical choices, asks the taste choices at one gate at the end, and never decides a User Challenge for you. Arguments: `[plan]`. |
 
+### Build
+
+| Skill&nbsp;name&nbsp;that&nbsp;you&nbsp;type | What it does |
+|---|---|
+| [`build`](skills/build) | Builds an approved spec task by task in the session, with a failing test first for each task. It records each ruling in `docs/ledgers/`, stops only for destructive, security, outward-facing or stuck cases, and ends with one review of the whole branch. Arguments: `[spec or plan]`. |
+
 ### 3. Check
 
 | Skill&nbsp;name&nbsp;that&nbsp;you&nbsp;type | What it does |
@@ -47,7 +53,7 @@ Each call starts with `/lilystack:`. For example, type `/lilystack:spec`. An arg
 
 | Skill&nbsp;name&nbsp;that&nbsp;you&nbsp;type | What it does |
 |---|---|
-| [`ship`](skills/ship) | Takes a branch to a pull request: merge, verify, review, audits, commits, push and PR. It asks before each of these steps. It examines each acceptance criterion of the spec. Arguments: `[base] [plan]`. |
+| [`ship`](skills/ship) | Takes a branch to a pull request: merge, verify, review, audits, commits, push and PR. It asks before each of these steps. It examines each acceptance criterion of the spec. When the tests are green you can also merge locally or keep the branch. Arguments: `[base] [plan]`. |
 | [`feedback`](skills/feedback) | Gives a verdict for each review comment before any change: fix, reply, or ask you. Arguments: `[PR or comments]`. |
 
 ### Anytime
@@ -75,7 +81,7 @@ Call a safety skill, and its hook is active until the session ends. You must cal
 | [`careful`](skills/careful) | Stops destructive shell commands, for example `rm -rf ~` or a force-push to `main`. Asks before other risky commands. |
 | [`secrets`](skills/secrets) | 🌱 **Original.** Stops reads of private keys and credential files. Asks before `.env` files and tokens. |
 | [`secure`](skills/secure) | Warns when an edit adds dangerous code, for example `eval` or `shell=True`. It does not block. |
-| [`test-first`](skills/test-first) | Asks before a source edit when no test file has changed yet. |
+| [`test-first`](skills/test-first) | Asks before a source edit when no test file has changed yet, and states the test-first discipline. |
 | [`freeze`](skills/freeze) | Limits edits and Bash writes to one folder. [`unfreeze`](skills/unfreeze) removes the limit. Arguments: `[dir]`. |
 | [`guard`](skills/guard) | Starts careful, secrets, secure and freeze with one call. Arguments: `[dir]`. |
 
@@ -101,9 +107,9 @@ These are the author's own tools. They are all 🌱 **Original**. The `lily` too
 | Part&nbsp;of&nbsp;the&nbsp;plugin | What it does |
 |---|---|
 | [`marketplace`](.claude-plugin/marketplace.json) | A one-plugin marketplace, so that you can install Lilystack with `claude plugin install`, from the folder or from GitHub. |
-| [`lens`](agents/lens.md) | 🌱 **Original.** An agent: a read-only subagent for one review lens. review, security-audit, plan-design-review and autoplan send it (review also when ship runs it). Its tools are Read, Grep and Glob, so it cannot edit or run a command. |
+| [`lens`](agents/lens.md) | 🌱 **Original.** An agent: a read-only subagent for one review lens. review, security-audit, plan-design-review and autoplan send it (review also when ship runs it), and build sends it when you ask for a review of each task. Its tools are Read, Grep and Glob, so it cannot edit or run a command. |
 | [`ste`](output-styles/ste.md) | 🌱 **Original.** An output style: Claude writes each reply in ASD-STE100 Simplified Technical English. It is off until you choose it with `/output-style lilystack:ste`. |
-| [`evals`](evals) | 🌱 **Original.** An eval suite: 46 cases for `claude plugin eval`. Each skill must start on its own request, and must not start on a near-miss. A quality case examines the output of prose. See [Evals](#evals). |
+| [`evals`](evals) | 🌱 **Original.** An eval suite: 48 cases for `claude plugin eval`. Each skill must start on its own request, and must not start on a near-miss. A quality case examines the output of prose. See [Evals](#evals). |
 
 ## Quick start
 
@@ -127,6 +133,7 @@ You need Claude Code, `jq` (the hooks use it) and `zsh` (only for the checks and
 |---|---|
 | Examine a new idea | `/lilystack:office-hours <idea>` |
 | Make a spec that I can test | `/lilystack:spec <request>` |
+| Build an approved spec | `/lilystack:build <spec>` |
 | Review a plan from every side | `/lilystack:autoplan <plan>` |
 | Merge a change | `/lilystack:review`, then `/lilystack:verify`, then `/lilystack:ship` |
 | Get another model's view | `/lilystack:second-opinion review` |
@@ -138,13 +145,13 @@ You need Claude Code, `jq` (the hooks use it) and `zsh` (only for the checks and
 
 ## Evals
 
-`claude plugin eval` gives two requests to each of the 22 skills that Claude can start (qa has one more, for a web page: 45 trigger and near-miss cases). One request is for the skill. The other request only uses the same words. A case passes when the skill starts on the first request and does not start on the second.
+`claude plugin eval` gives two requests to each of the 23 skills that Claude can start (qa has one more, for a web page: 47 trigger and near-miss cases). One request is for the skill. The other request only uses the same words. A case passes when the skill starts on the first request and does not start on the second.
 
 ```sh
 claude plugin eval . --tag trigger --ablation none --no-publish
 ```
 
-The last full run (`--runs 1`, on 2026-11-06) passed 45 of 46 cases for $2.46. A rerun of the quality case after a repair passed for $0.15, so all 46 cases pass. The trigger graders need no model. The quality case also asks a judge model; run it with `--tag quality`. `--no-publish` keeps the report on your machine. Each run starts real Claude sessions, so it costs money. It is not one of the five checks. See [`evals/README.md`](evals/README.md).
+The last full run (`--runs 1`, on 2026-11-06) passed 45 of 46 cases for $2.46. A rerun of the quality case after a repair passed for $0.15, so all 46 cases of that run pass. The two `build` cases came on 2026-11-12 and have not run yet. The trigger graders need no model. The quality case also asks a judge model; run it with `--tag quality`. `--no-publish` keeps the report on your machine. Each run starts real Claude sessions, so it costs money. It is not one of the five checks. See [`evals/README.md`](evals/README.md).
 
 ## Checks
 
@@ -160,7 +167,7 @@ After a change to a mod in `mods/`, also run `claude plugin validate .` and `cla
 
 ## Where the skills come from
 
-<p align="center"><img src="docs/assets/harvest.svg" width="100%" alt="How the harvest worked. Four research agents read 25 top repositories at fixed commits. Text and rules came from twelve MIT sources and three Apache-2.0 sources. Ideas only came from five more. Six were not taken, each for a stated reason. The steps: read the license, keep the core, remove the runtime. The result: 32 skills, 5 hooks, 1 lens agent, 46 evals."></p>
+<p align="center"><img src="docs/assets/harvest.svg" width="100%" alt="How the harvest worked. Four research agents read 25 top repositories at fixed commits. Text and rules came from twelve MIT sources and three Apache-2.0 sources. Ideas only came from five more. Six were not taken, each for a stated reason. The steps: read the license, keep the core, remove the runtime. The result: 33 skills, 5 hooks, 1 lens agent, 48 evals."></p>
 
 Each skill is a short rewrite. It keeps the questions, the checklists, the rules and the output formats of its source, and removes the runtime. [`docs/designs/harvest.md`](docs/designs/harvest.md) tells how the harvest found the sources, and why it did not take other repositories. [`NOTICE.md`](NOTICE.md) has the notices and one row for each skill.
 
@@ -173,7 +180,7 @@ Each skill is a short rewrite. It keeps the questions, the checklists, the rules
 | [EveryInc/compound-engineering-plugin](https://github.com/EveryInc/compound-engineering-plugin) | The adversarial and coherence reviewers, feedback, the prevention ladder, compound | MIT |
 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | The performance recipe, contract rows, the mutation probe | MIT |
 | [affaan-m/ECC](https://github.com/affaan-m/ECC) | The shape of an acceptance criterion; when to compact; the "what did not work" record | MIT |
-| [obra/superpowers](https://github.com/obra/superpowers) | Its plan and spec folders, the builder read, the test shapes | MIT |
+| [obra/superpowers](https://github.com/obra/superpowers) | build, the test-first discipline, the stance of feedback, the proof table of verify, the landing step of ship, the size triage and the builder read of office-hours, the test shapes | MIT |
 | [blader/humanizer](https://github.com/blader/humanizer) | prose | MIT |
 | [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) | The lean ladder and the shortcut ledger | MIT |
 | [multica-ai/andrej-karpathy-skills](https://github.com/multica-ai/andrej-karpathy-skills) | The rule that each changed line traces to the request | MIT |

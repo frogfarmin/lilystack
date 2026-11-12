@@ -17,11 +17,11 @@ One line for each changed code path, with its tests:
     malformed input     [★ smoke only  test/parse_test.ext:30]
   fn save()
     write fails         [GAP: mutation survived  test/save_test.ext:9]
-Review Focus (docs/superpowers/plans/<plan>.md)
+Review focus (docs/specs/<slug>.md)
   duplicate ids         [GAP]
 ```
 
-A required row from a plan's `## Review Focus` goes under its own heading. It
+A required row from a spec's `## Review focus` goes under its own heading. It
 stays `[GAP]` until a test names its input or condition and asserts the
 behaviour the line expects.
 

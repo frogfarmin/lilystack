@@ -1,4 +1,4 @@
-<!-- Lilystack. Rewritten from gstack spec/SKILL.md.tmpl and the "Rules for the implementing agent" of the generated spec/SKILL.md at 466689b (MIT, Copyright (c) 2026 Garry Tan); and spec-kit templates/spec-template.md, templates/tasks-template.md and templates/commands/checklist.md at d649834 (MIT, Copyright GitHub, Inc.); and ECC skills/intent-driven-development/SKILL.md at b38be6a (MIT, Copyright (c) 2026 Affaan Mustafa). -->
+<!-- Lilystack. Rewritten from gstack spec/SKILL.md.tmpl and the "Rules for the implementing agent" of the generated spec/SKILL.md at 466689b (MIT, Copyright (c) 2026 Garry Tan); and spec-kit templates/spec-template.md, templates/tasks-template.md and templates/commands/checklist.md at d649834 (MIT, Copyright GitHub, Inc.); and ECC skills/intent-driven-development/SKILL.md at b38be6a (MIT, Copyright (c) 2026 Affaan Mustafa); and superpowers skills/writing-plans/SKILL.md at 22f0b46 (MIT, Copyright (c) 2025 Jesse Vincent). -->
 
 # The spec template and self-check
 
@@ -67,9 +67,14 @@ A change tree where ownership matters: + new, ~ changed, - removed.>
 ## Phases
 - [ ] Phase 1: <what now works end to end>
   - [ ] T001 <task, with the exact path>
+    - Interfaces: consumes <exact names and signatures from earlier tasks, or nothing>; produces <exact names, parameter and return types that later tasks rely on, or nothing>
   - [ ] T002 <task>
+    - Interfaces: consumes <...>; produces <...>
   - Verify: `<runnable command>`
 - [ ] Phase 2: <the next thin slice>
+
+## Review focus
+<At most five inputs or failure modes that the spec implies and no test-plan row exercises, most likely to hurt a user first. One line each: the input or condition, and the behaviour a reasonable user expects. "None found" when you looked and found none.>
 
 Next step: <the single next action>
 
@@ -103,6 +108,17 @@ touch)`, so nothing correct is "fixed" into a regression.
   where no command can show it.
 - Task lines read `- [ ] T001 <description with exact path>`, numbered across
   the whole spec. Every task belongs to a phase.
+- Each task has an Interfaces line. The builder of one task may see only
+  that task, so this line is how it learns the names and types of its
+  neighbours. A name that a later task consumes is spelled the same way
+  where an earlier task produces it.
+
+**Review focus.** The spec says what the software must do, not everything it
+will meet, and its silence on an input does not permit that input to break
+the program. Where a line can get a test, add the test-plan row and the task
+and drop the line. What stays is checked on purpose by the final review of
+`/lilystack:build`, and `/lilystack:ship` counts each line as a gap until a
+test names it.
 
 **Acceptance criteria.** Fail: "AC-001: The export works correctly and is
 secure"; nobody can say whether it was met. Pass: Scenario "orders older than
@@ -134,3 +150,6 @@ fixed before the draft is shown, or listed at its top after three passes.
 10. If a decision is still Open, does Status say Draft?
 11. Do all sections agree, with one term for each concept?
 12. Is the text free of secrets, tokens and personal data, even as examples?
+13. Does each task that uses another task's work name it on its Interfaces
+    line, with the same spelling on both sides?
+14. Is Review focus filled in, or "None found" after a real look?

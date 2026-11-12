@@ -11,7 +11,7 @@ Lilystack is a Claude Code plugin. It has these parts:
 - **Hooks.** Bash scripts in `hooks/`. careful, secrets and secure read a
   plain rules file beside the script.
 - **A lens agent** (`agents/lens.md`). It is a read-only subagent for review
-  (also when ship runs review), security-audit and the plan skills. Its tools are Read, Grep and Glob only.
+  (also when ship runs review), security-audit, the plan skills and, on request, build. Its tools are Read, Grep and Glob only.
 - **An output style** (`output-styles/ste.md`). It is opt-in. It makes Claude
   write in Simplified Technical English.
 - **Evals** (`evals/`). They make sure that each skill starts when it must,
@@ -87,6 +87,7 @@ good skill or setup, change the rule in the same pull request and say why.
    |---|---|
    | office-hours | `docs/designs/<topic>.md` |
    | spec | `docs/specs/<slug>.md` |
+   | build | `docs/ledgers/<plan-basename>.md`, the code and tests that the plan names, and ticks in the plan |
    | compound | `docs/solutions/<slug>.md`, and a check, a standard or a pointer line, each after the owner says yes |
    | plan reviews and autoplan | The plan or design file that they get, between `<!-- lilystack:<skill>:start -->` and `:end` markers |
    | write-skill | The skill that it gets |
@@ -94,10 +95,13 @@ good skill or setup, change the rule in the same pull request and say why.
    | All other skills | No report file unless the owner asks. They report in chat. A code change follows the rule of the skill |
 
    Project memory is in the docs of each project (`docs/solutions/` too),
-   `CLAUDE.md` and Bear. Global state goes only under `~/.lilystack/`.
+   `CLAUDE.md` and `~/Vaults/memory`, which Claude Code's auto-memory
+   writes. Global state goes only under `~/.lilystack/`.
 6. **Subagents.** Any skill may send read-only subagents for research and
    review lenses. Prefer `lilystack:lens`. Give a subagent the material and
-   the rules, not your conclusion. A skill may run other Lilystack skills in
+   the rules, not your conclusion. One exception writes: build may send one
+   implementer subagent at a time, only when the owner asks for it, and it
+   checks the diff itself before it accepts the work. A skill may run other Lilystack skills in
    order (autoplan does this). Each question to the owner still goes one at a
    time, and a skill never decides a User Challenge for the owner. Each agent
    in `agents/` has an explicit `tools` list. The lint makes sure of this.
@@ -126,9 +130,8 @@ good skill or setup, change the rule in the same pull request and say why.
    - Source-available, "all rights reserved", or a rider against a user of
      Lilystack: do not use it. This is the law of the upstream, not a rule of
      Lilystack.
-3. Make sure that it does not copy a skill that the owner already runs
-   (superpowers and mattpocock's skills). If it does, add a cross-reference
-   only.
+3. Make sure that it does not copy a skill that Lilystack already has. If
+   it does, edit that skill; do not add a second one.
 4. Do a diet rewrite. Keep the questions, checklists, rules and output
    formats. Remove the runtime. Obey the diet rules above.
 5. Add the provenance comment, a row in the skills table of `NOTICE.md`, and

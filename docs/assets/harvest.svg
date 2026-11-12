@@ -64,13 +64,13 @@
 <text class="mu" x="644" y="310" font-size="12">No telemetry. Browser and second model opt-in.</text>
 <path d="M757,336 L757,356 M750,349 L757,356 L764,349" fill="none" style="stroke:var(--mu)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 <rect x="590" y="366" width="334" height="118" rx="14" style="fill:var(--ly-f);stroke:var(--ly)" stroke-opacity=".4" stroke-width="1.25"/>
-<text x="612" y="418" font-size="30" font-weight="800" style="fill:var(--ly)">32</text>
+<text x="612" y="418" font-size="30" font-weight="800" style="fill:var(--ly)">33</text>
 <text class="mu" x="612" y="440" font-size="12">skills</text>
 <text x="692" y="418" font-size="30" font-weight="800" style="fill:var(--ly)">5</text>
 <text class="mu" x="692" y="440" font-size="12">hooks</text>
 <text x="772" y="418" font-size="30" font-weight="800" style="fill:var(--ly)">1</text>
 <text class="mu" x="772" y="440" font-size="12">lens agent</text>
-<text x="852" y="418" font-size="30" font-weight="800" style="fill:var(--ly)">46</text>
+<text x="852" y="418" font-size="30" font-weight="800" style="fill:var(--ly)">48</text>
 <text class="mu" x="852" y="440" font-size="12">evals</text>
 <text class="mu" x="612" y="468" font-size="12">Each file names its source and license on line 1.</text>
 </svg>

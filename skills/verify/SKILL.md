@@ -2,7 +2,7 @@
 name: verify
 description: Run the repo's own checks and the tests that cover the change, fix, repeat until green; never calls a change green without a covering test
 ---
-<!-- Lilystack. Rewritten from gstack verify/SKILL.md.tmpl at 466689b (MIT, Copyright (c) 2026 Garry Tan); and agent-skills skills/code-review-and-quality/SKILL.md at 301b02b (MIT, Copyright (c) 2025 Addy Osmani); and compound-engineering-plugin skills/ce-code-review/references/personas/testing-reviewer.md at 173bd33 (MIT, Copyright (c) 2025 Every). -->
+<!-- Lilystack. Rewritten from gstack verify/SKILL.md.tmpl at 466689b (MIT, Copyright (c) 2026 Garry Tan); and agent-skills skills/code-review-and-quality/SKILL.md at 301b02b (MIT, Copyright (c) 2025 Addy Osmani); and compound-engineering-plugin skills/ce-code-review/references/personas/testing-reviewer.md at 173bd33 (MIT, Copyright (c) 2025 Every); and superpowers skills/verification-before-completion/SKILL.md at 22f0b46 (MIT, Copyright (c) 2025 Jesse Vincent). -->
 
 # Verify: run, fix, run
 
@@ -84,6 +84,23 @@ the missing test case. Never mutate the shared checkout.
 
 Then point on: `/lilystack:ship` when the branch is ready to land, or
 `/lilystack:review` first if the change has not been reviewed.
+
+## What proves a claim
+
+Before any claim that something works, name the command that proves it, run
+it now, and read its output.
+
+| Claim | Proof | Not proof |
+|---|---|---|
+| Tests pass | this run's output: N ran, 0 failed | an earlier run; the exit code alone |
+| Bug fixed | the reproduction of the first symptom now passes | the code changed |
+| Regression test works | it fails without the fix and passes with it | it passes once |
+| An agent finished | `git diff` shows the change, and you ran its check | the agent's report |
+| Build or lint clean | that command's own output | a different check that passed |
+| Requirements met | each criterion checked, line by line | green tests |
+
+"Should", "probably" and "seems" in your own report mark a claim that
+nobody ran. Run it, or report it as not verified.
 
 ## Rules
 

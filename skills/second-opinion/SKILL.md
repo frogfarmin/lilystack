@@ -45,8 +45,7 @@ ask. Use `origin/<base>` when it exists. The scope is
 ignored ones). On the base with no changes, say "Nothing to review" and stop.
 
 **A plan.** Use the path that the owner gives. Else look for the plan or spec
-of this branch in `docs/specs/`, `docs/plans/`, `docs/superpowers/plans/` and
-`docs/designs/`. If you are not sure which file it is, ask for the path; never
+of this branch in `docs/specs/`, `docs/plans/` and `docs/designs/`. If you are not sure which file it is, ask for the path; never
 guess. The plan text goes into the prompt, not only its path, because the
 other tool may not be able to read it.
 
