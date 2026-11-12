@@ -49,8 +49,14 @@ claude plugin eval . --tag trigger --ablation none --no-publish
 
 ## Last full run
 
-2026-11-06, Claude Code 2.1.318, `--runs 1`: 45 of 46 cases passed, in 120
-seconds, for $2.46. The quality case failed, and it found a real fault: with
-`--ste`, prose added an actor ("we") that the source did not name. After the
-repair to prose, the quality case passed 2 of 2 runs ($0.15). The command
-above runs each case two times, so it costs about two times as much.
+2026-11-12, Claude Code 2.1.322, `--runs 1 -j 4`, all tags: 48 of 48 cases
+passed, in 130 seconds, for $2.63. The run includes the two `build` cases and
+the quality case.
+
+The run before it (2026-11-06, Claude Code 2.1.318, `--runs 1`) passed 45 of
+46 cases, in 120 seconds, for $2.46. The quality case failed, and it found a
+real fault: with `--ste`, prose added an actor ("we") that the source did not
+name. After the repair to prose, the quality case passed 2 of 2 runs ($0.15).
+
+The command above runs each case two times, so it costs about two times as
+much.

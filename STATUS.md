@@ -4,12 +4,14 @@
 - Use the new skills on a real project. The seven skills of the first harvest had a dry run on test repos on 2026-11-06. The seven of the second harvest passed their trigger evals, but they had no dry run yet (see `docs/verification-log.md`).
 
 ## Waiting on you
-- Run the trigger evals, so that the two `build` cases have a result (`claude plugin eval . --tag trigger --ablation none --no-publish`). Then change "46/46" in `docs/assets/hero.svg` and the Evals section of the README.
+- In the GitHub settings of this repo, add a ruleset for `main`: no force-push, no deletion, a pull request before a merge, and the `checks` status must pass. No tool in a Claude cloud session can change this setting.
+- In the GitHub settings of this repo, make sure that private vulnerability reporting is on. `SECURITY.md` tells a reporter to use it.
 - In the desktop app, check that `/plugin` shows `focus`, `verify-gate` and `outbound-ledger`. Lilypad's `settings.json` already enables them; if one is missing, install it from the lilystack marketplace (+, then Plugins).
 - On each Mac, in this order: pull Lilystack, pull Lilypad, run `~/Lilypad/bin/lily check`.
 - Decide how the status mod loads. The desktop app does not read `~/.zshrc.local`, so the `CLAUDE_CODE_PLUGIN_DIRS` line in `mods/status/README.md` works only in the terminal. To use it in the app, add status to the marketplace (AGENTS.md says that the marketplace lists all mods but status).
 
 ## Done
+- 2026-11-12: A full eval run: 48 of 48 cases pass, with the two `build` cases and the quality case (see `docs/verification-log.md`). The hero image, the README and `evals/README.md` show this result.
 - 2026-11-12: A clean, sweep and audit pass for the public repo. The audit found no secret in the tree or in the git history, no broken link and no orphan file. The README has a new order (quick start first), badges, a Mods section and five numbered sprint steps. `docs/assets/map.svg` now shows build and all four mods. The stale counts in the image descriptions and in the manifests were corrected.
 - 2026-11-09: A review, test and hardening pass. Hooks: careful closes wrapper bypasses (`caffeinate rm -rf ~` and others), comment and pipe tricks on unless-rules, and more root spellings; secrets catches custom key names in `~/.ssh`, globs and folder copies; freeze keeps the boundary when the cwd changes, sees more writers and nested shells, and costs about 13 ms (was 48) when no freeze is set; all five hooks fail closed on a payload of the wrong shape. `lily sweep` refuses `./` spellings of a mapped source and paths through a symlinked folder. The four mods got bug fixes (see their READMEs). Tests: hooks 627, lily 106, mods 54/29/17/42. All 627 hook tests pass under macOS `/bin/bash` 3.2 (run on a Mac, 2026-11-10).
 - 2026-11-07: Three new mods, each with tests: verify-gate (an APPROVED stamp and a stop on PR merges), outbound-ledger (a pane of outward actions) and focus (one main action, then the tasks after it, checked off in a pane). The marketplace lists them. A headless session loaded all three with no hook errors.

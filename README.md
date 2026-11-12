@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/assets/hero.svg" width="100%" alt="Lilystack: short rewrites of the best Claude Code skills. 33 skills, 5 safety hooks, 46 of 46 evals pass, 0 telemetry. From 15 upstreams, about 2.1k tokens in each session."></p>
+<p align="center"><img src="docs/assets/hero.svg" width="100%" alt="Lilystack: short rewrites of the best Claude Code skills. 33 skills, 5 safety hooks, 48 of 48 evals pass, 0 telemetry. From 15 upstreams, about 2.1k tokens in each session."></p>
 
 <p align="center">
   <a href="https://github.com/frogfarmin/Lilystack/actions/workflows/checks.yml"><img src="https://img.shields.io/github/actions/workflow/status/frogfarmin/Lilystack/checks.yml?branch=main&amp;label=checks" alt="The result of the checks on main"></a>
@@ -208,8 +208,7 @@ The author keeps config and ideas in a second repo, [Lilypad](https://github.com
 claude plugin eval . --tag trigger --ablation none --no-publish
 ```
 
-- **The last full run** (`--runs 1`, on 2026-11-06) passed 45 of 46 cases for $2.46. A rerun of the quality case after a repair passed for $0.15, so all 46 cases of that run pass.
-- **Not run yet:** the two `build` cases. They came on 2026-11-12.
+- **The last full run** (`--runs 1`, on 2026-11-12) passed 48 of 48 cases in 130 seconds, for $2.63. It includes the two `build` cases and the quality case.
 - **Graders.** The trigger graders need no model. The quality case also asks a judge model; run it with `--tag quality`.
 - **Cost.** Each run starts real Claude sessions, so it costs money. It is not one of the five checks. `--no-publish` keeps the report on your machine.
 
