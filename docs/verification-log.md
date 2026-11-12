@@ -164,3 +164,9 @@ A code review of the branch found these gaps. Each fix has a test row.
 
 After the fixes, `zsh tests/test-hooks.zsh` gave 464 passed, 0 failed, under
 the bash of the container and under bash 3.2.57. The other four checks pass.
+
+## Hooks under macOS bash 3.2, 2026-11-10
+
+`zsh tests/test-hooks.zsh` ran on a Mac, where the hooks use `/bin/bash`
+3.2: 627 passed, 0 failed. This closes the open item of 2026-11-06, when the
+same tests ran only under a bash 3.2.57 that was built on Linux.

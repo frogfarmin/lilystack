@@ -355,9 +355,9 @@ license:
 ## 11. To examine by test, not by the docs
 
 - `CLAUDE_CODE_PLUGIN_DIRS` on the Claude Code of the second Mac (2.1.316).
-- The hooks on a real Mac. On 2026-11-06 all hook tests passed under bash
-  3.2.57 built from Apple's source on Linux (`verification-log.md`), but not
-  yet on macOS itself.
+- The hooks on a real Mac. Examined: on 2026-11-06 all hook tests passed
+  under bash 3.2.57 built from Apple's source on Linux, and on 2026-11-10 all
+  627 passed under macOS `/bin/bash` 3.2 (`verification-log.md`).
 - A symlink `~/.claude/skills/lilystack` as a skills-folder plugin, only if
   the variable does not work. The docs say that Claude Code rejects symlinks
   outside a plugin.

@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 300" width="960" height="300" role="img" aria-labelledby="t d">
 <title id="t">Lilystack</title>
-<desc id="d">Lilystack: short rewrites of the best Claude Code skills. 33 skills, 5 safety hooks, 46/46 trigger evals pass, 18 upstream sources, no telemetry.</desc>
+<desc id="d">Lilystack: short rewrites of the best Claude Code skills. 33 skills, 5 safety hooks, 46 of 46 evals pass, no telemetry. Markdown and bash, from 15 upstreams, about 2.1k tokens in each session.</desc>
 <style>
   svg{--bg:#f6faf7;--bg2:#eef6f8;--card:#ffffff;--line:#d5e3db;--tx:#0f1f17;--mu:#55645c;--th:#3f51b5;--th-f:#eef0ff;--pl:#7c3aed;--pl-f:#f4efff;--ck:#0f766e;--ck-f:#e9f8f5;--sh:#b45309;--sh-f:#fff5e8;--sf:#be123c;--sf-f:#fff0f3;--an:#4d7c0f;--an-f:#f3f9e8;--ly:#047857;--ly-f:#e8f8f0;--pad1:#15803d;--pad2:#22a352;--pad3:#4cc574;--padv:#0e5e2c;--pet:#f9a8c9;--pet2:#fde4ee;--core:#f5c542;--rip:#9cc9b4;}
   @media (prefers-color-scheme: dark){svg{--bg:#0c1411;--bg2:#0b161b;--card:#131d19;--line:#25352e;--tx:#e7f2ec;--mu:#97a89f;--th:#9fa8ff;--th-f:#15172d;--pl:#c4a6ff;--pl-f:#1b1529;--ck:#5fd4c4;--ck-f:#0d2724;--sh:#f4b860;--sh-f:#231a0e;--sf:#ff8fa8;--sf-f:#261219;--an:#a3d65c;--an-f:#151d0e;--ly:#5ee0a8;--ly-f:#0c2119;--pad1:#1f9d50;--pad2:#2fb862;--pad3:#57d283;--padv:#0b4a23;--pet:#f58ab5;--pet2:#f9c6da;--core:#f5c542;--rip:#2c5244;}}
