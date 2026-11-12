@@ -170,3 +170,15 @@ the bash of the container and under bash 3.2.57. The other four checks pass.
 `zsh tests/test-hooks.zsh` ran on a Mac, where the hooks use `/bin/bash`
 3.2: 627 passed, 0 failed. This closes the open item of 2026-11-06, when the
 same tests ran only under a bash 3.2.57 that was built on Linux.
+
+## Full eval run, 2026-11-12
+
+`claude plugin eval . --runs 1 --ablation none --no-publish -j 4` ran all 48
+cases on Claude Code 2.1.322, in a cloud container, at commit `51283f8`: 47
+trigger and near-miss cases for 23 skills (qa has one more, for a web page),
+and the quality case for `prose --ste`.
+
+- 48 of 48 passed, in 130 seconds, for $2.63.
+- The two `build` cases ran for the first time. build started on its trigger
+  request, and it did not start on its near-miss request.
+- The run left no folder in `/tmp/claude-eval-*`.
