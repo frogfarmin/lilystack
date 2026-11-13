@@ -88,7 +88,7 @@ The Lilystack marketplace lists this mod as `verify-gate`.
 
 - **In the desktop app:** click **+** next to the prompt box, then
   **Plugins**. If the `lilystack` marketplace is not there, add the marketplace
-  `frogfarmin/Lilystack`. Then add the plugin `verify-gate`.
+  `shaunjones-gh/lilystack`. Then add the plugin `verify-gate`.
 - **In a terminal:**
 
   ```sh

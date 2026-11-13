@@ -111,7 +111,7 @@ desktop app, which does not read zsh files.
   marketplace in `extraKnownMarketplaces` and enables `lilystack@lilystack`.
   By hand: `claude plugin marketplace add ~/Lilystack`, then
   `claude plugin install lilystack@lilystack`. From GitHub:
-  `claude plugin marketplace add frogfarmin/Lilystack`, then
+  `claude plugin marketplace add shaunjones-gh/lilystack`, then
   `claude plugin install lilystack@lilystack`.
   `.claude-plugin/marketplace.json` makes this possible. It keeps its state in
   `~/.claude/plugins/`, outside Lilypad. It was tested on 2026-11-06 in a

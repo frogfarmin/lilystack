@@ -68,7 +68,7 @@ The Lilystack marketplace lists this mod as `outbound-ledger`.
 
 - **In the desktop app:** click **+** next to the prompt box, then
   **Plugins**. If the `lilystack` marketplace is not there, add the marketplace
-  `frogfarmin/Lilystack`. Then add the plugin `outbound-ledger`.
+  `shaunjones-gh/lilystack`. Then add the plugin `outbound-ledger`.
 - **In a terminal:**
 
   ```sh

@@ -1,9 +1,9 @@
 <p align="center"><img src="docs/assets/hero.svg" width="100%" alt="Lilystack: short rewrites of the best Claude Code skills. 33 skills, 5 safety hooks, 48 of 48 evals pass, 0 telemetry. From 15 upstreams, about 2.1k tokens in each session."></p>
 
 <p align="center">
-  <a href="https://github.com/frogfarmin/Lilystack/actions/workflows/checks.yml"><img src="https://img.shields.io/github/actions/workflow/status/frogfarmin/Lilystack/checks.yml?branch=main&amp;label=checks" alt="The result of the checks on main"></a>
-  <a href=".claude-plugin/plugin.json"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Ffrogfarmin%2FLilystack%2Fmain%2F.claude-plugin%2Fplugin.json&amp;query=%24.version&amp;label=version&amp;color=047857" alt="The version of the plugin"></a>
-  <a href="LICENSE"><img src="https://img.shields.io/github/license/frogfarmin/Lilystack?color=047857" alt="License: MIT"></a>
+  <a href="https://github.com/shaunjones-gh/lilystack/actions/workflows/checks.yml"><img src="https://img.shields.io/github/actions/workflow/status/shaunjones-gh/lilystack/checks.yml?branch=main&amp;label=checks" alt="The result of the checks on main"></a>
+  <a href=".claude-plugin/plugin.json"><img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fshaunjones-gh%2Flilystack%2Fmain%2F.claude-plugin%2Fplugin.json&amp;query=%24.version&amp;label=version&amp;color=047857" alt="The version of the plugin"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/shaunjones-gh/lilystack?color=047857" alt="License: MIT"></a>
 </p>
 
 <p align="center">
@@ -36,7 +36,7 @@ You need Claude Code, `jq` (the hooks use it) and `zsh` (only for the checks and
 1. Install the plugin from GitHub:
 
    ```sh
-   claude plugin marketplace add frogfarmin/Lilystack
+   claude plugin marketplace add shaunjones-gh/lilystack
    claude plugin install lilystack@lilystack
    ```
 
@@ -169,7 +169,7 @@ A mod adds a part to the Claude Code interface: a band above the prompt, a pane,
 
 ### Lily tools (optional)
 
-These are the author's own tools. They are all 🌱 **Original**. The `lily` tool and the `lily-*` skills act on a clone of the author's hub repo (config and ideas), [Lilypad](https://github.com/frogfarmin/Lilypad), at `~/Lilypad`, not on the project that you are in. Without a `~/Lilypad` folder they do nothing useful, so you can ignore them. You can also read or fork Lilypad as an example.
+These are the author's own tools. They are all 🌱 **Original**. The `lily` tool and the `lily-*` skills act on a clone of the author's hub repo (config and ideas), [Lilypad](https://github.com/shaunjones-gh/lilypad), at `~/Lilypad`, not on the project that you are in. Without a `~/Lilypad` folder they do nothing useful, so you can ignore them. You can also read or fork Lilypad as an example.
 
 | Tool&nbsp;or&nbsp;skill&nbsp;name | What it does |
 |---|---|
@@ -181,7 +181,7 @@ These are the author's own tools. They are all 🌱 **Original**. The `lily` too
 <details>
 <summary>The author's setup: Lilystack and Lilypad on two Macs</summary>
 
-The author keeps config and ideas in a second repo, [Lilypad](https://github.com/frogfarmin/Lilypad), and uses Lilystack on two Macs, in the Claude desktop app. The desktop app loads Lilystack from its marketplace, which Lilypad's `Claude/settings.json` names.
+The author keeps config and ideas in a second repo, [Lilypad](https://github.com/shaunjones-gh/lilypad), and uses Lilystack on two Macs, in the Claude desktop app. The desktop app loads Lilystack from its marketplace, which Lilypad's `Claude/settings.json` names.
 
 <p align="center"><img src="docs/assets/repos.svg" width="100%" alt="How Lilystack and Lilypad fit in the author's setup. Lilypad holds the config: links.conf and the config files. bin/lily in Lilystack reads links.conf and makes symlinks on the two Macs. Claude Code on the Macs loads the Lilystack skills and hooks from its marketplace. The main Mac also loads the status mod. lily pull updates Lilystack first, then Lilypad; then run lily check."></p>
 
