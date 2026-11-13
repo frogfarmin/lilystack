@@ -71,7 +71,7 @@ The Lilystack marketplace lists this mod as `focus`.
 
 - **In the desktop app:** click **+** next to the prompt box, then
   **Plugins**. If the `lilystack` marketplace is not there, add the marketplace
-  `frogfarmin/Lilystack`. Then add the plugin `focus`.
+  `shaunjones-gh/lilystack`. Then add the plugin `focus`.
 - **In a terminal:**
 
   ```sh

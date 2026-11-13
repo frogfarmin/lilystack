@@ -1,6 +1,6 @@
 # The owner reviews every change. The hooks, their rules and the CI are the safety parts.
-*                @frogfarmin
-/hooks/          @frogfarmin
-/agents/         @frogfarmin
-/.github/        @frogfarmin
-/.claude-plugin/ @frogfarmin
+*                @shaunjones-gh
+/hooks/          @shaunjones-gh
+/agents/         @shaunjones-gh
+/.github/        @shaunjones-gh
+/.claude-plugin/ @shaunjones-gh
